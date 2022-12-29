@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@types/node": "^18.11.18",
+    "@types/uglify-js": "^3.17.1",
+    "uglify-js": "^3.17.4"
+  }
+}
