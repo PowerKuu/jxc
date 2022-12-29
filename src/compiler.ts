@@ -2,8 +2,10 @@ import { Attributes, BuildOptions, Child, Element, Elements } from "./types"
 
 import { minify } from "uglify-js"
 
-import { join } from "path"
+import { join, resolve } from "path"
 import { mkdirSync, writeFileSync } from "fs"
+
+import * as crypto from "crypto"
 
 const bundel = {
     script: "",
@@ -17,12 +19,11 @@ function stringifyFunction(func: (...args:any[]) => any, args:any[] = [], defer 
 
     const funcString = func.toString()
     const funcMinify = minify(funcString, {
-        "compress": false
+        "compress": false,
     })
 
     const funcMinifyString = funcMinify.error ? 
-    funcMinify :
-    // Remove trailing semicolon 
+    funcString : 
     funcMinify.code.slice(0, -1)
     
     const stringArgs = args ? 
@@ -65,7 +66,7 @@ function compileAttributes(element: Element<Child<any>>): string {
         return `"${str}"`
     }    
 
-    var attributesArray = []
+    var attributesArray:string[] = []
 
     for (var [key, value] of  Object.entries(element.attributes)) {
         if (typeof value == "function") {
@@ -94,7 +95,7 @@ function compileAttributes(element: Element<Child<any>>): string {
 
 
 function compileChildren(element: Element<Child<any>>): string {
-    var childrenArray = []
+    var childrenArray:string[] = []
 
     for (var child of element.children) {
         if (typeof child == "string") {
@@ -128,7 +129,7 @@ export function compile(element: Element<any>): string {
 
 export function build(options: BuildOptions) {
     for (var [path, element] of Object.entries(options.paths)){
-        const dirPath = join(__dirname, options.outDir, path)
+        const dirPath = resolve(__dirname, options.outDir, path)
         const fullPath = join(dirPath, "index.html")
 
         mkdirSync(dirPath, {recursive: true})
@@ -140,41 +141,17 @@ export function build(options: BuildOptions) {
             `<script>${bundel.script}</script>`,
             `<style>${bundel.style}</style>`,
             compiled
-        ].join(""))
+        ].join("\n"))
     }
 }
 
-export function factory<Tag extends keyof Elements>(tag:Tag, attributes:Attributes, ...children: Elements[Tag][]):Element<Elements[Tag]> {
+export function factory<Tag extends keyof Elements>(tag:Tag, attributes:Attributes|null, ...children: Elements[Tag][]):Element<Elements[Tag]> {
     return {
         tag: tag,
-        attributes: attributes,
+        attributes: attributes ?? {},
         children: children,
         
         elementID: crypto.randomUUID()
     }
 }
-
-export function testApp() {
-    return factory("html", {},
-        factory("head", {}, 
-            factory("script", {defer: true, args: []}, () => {
-                console.log("test")
-            })
-        ),
-        factory("body", {}, 
-            factory("h1",{onclick: (s) => {console.log(this.event)}}, "this is an exsample"),
-            factory("p", {}, "dette er en test du tror du er kul")
-        ),
-    )
-}
-
-
-build({
-    outDir: "/dist",
-
-    paths: {
-        "home": testApp()
-    }
-})
-
 

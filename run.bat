@@ -1,0 +1,1 @@
+npx babel src --extensions ".tsx,.ts" --out-file-extension .js --out-dir dist --copy-files 
