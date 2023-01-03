@@ -1,8 +1,11 @@
-import { execSync } from "child_process";
-import { join } from "path";
-import { construct } from "./compiler";
-import * as fs from "fs";
-const buildLocation = join(__dirname, "babel", ".build");
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.build = exports.evalRoutes = exports.transpileRoutes = void 0;
+const child_process_1 = require("child_process");
+const path_1 = require("path");
+const compiler_1 = require("./compiler");
+const fs = require("fs");
+const buildLocation = (0, path_1.join)(__dirname, "babel", ".build");
 const tryCatch = (func) => {
     try {
         return func();
@@ -11,9 +14,9 @@ const tryCatch = (func) => {
         return;
     }
 };
-export function transpileRoutes(input) {
+function transpileRoutes(input) {
     const output = buildLocation;
-    const babelConfigPath = join(__dirname, "babel", "babel.config.js");
+    const babelConfigPath = (0, path_1.join)(__dirname, "babel", "babel.config.js");
     //const command = `npx babel routes --extensions ".tsx,.jsx,.ts,.js" --out-file-extension .js --out-dir dist --copy-files --config-file ${babelConfigPath}`
     const command = [
         "npx", "babel", input,
@@ -23,14 +26,15 @@ export function transpileRoutes(input) {
         "--copy-files",
         "--config-file", babelConfigPath
     ].join(" ");
-    execSync(command);
+    (0, child_process_1.execSync)(command);
 }
-export function evalRoutes(output) {
+exports.transpileRoutes = transpileRoutes;
+function evalRoutes(output) {
     const input = buildLocation;
     const dirs = fs.readdirSync(input, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name);
-    const publicDir = join(input, "public");
+    const publicDir = (0, path_1.join)(input, "public");
     const publicDirExists = fs.existsSync(publicDir);
     if (publicDirExists) {
         fs.cpSync(publicDir, output, { recursive: true });
@@ -38,9 +42,9 @@ export function evalRoutes(output) {
     for (var dirName of dirs) {
         if (dirName === "public")
             continue;
-        const inPath = join(input, dirName);
-        const outPath = join(output, dirName);
-        const rootComponent = tryCatch(() => require(join(inPath, "index.js")).default);
+        const inPath = (0, path_1.join)(input, dirName);
+        const outPath = (0, path_1.join)(output, dirName);
+        const rootComponent = tryCatch(() => require((0, path_1.join)(inPath, "index.js")).default);
         if (!rootComponent)
             continue;
         if (!(typeof rootComponent == "function")) {
@@ -52,14 +56,16 @@ export function evalRoutes(output) {
             const err = `Path: ${dirName} does not export default an element!`;
             throw new Error(err);
         }
-        construct({
+        (0, compiler_1.construct)({
             outDir: outPath,
             element: rootElement
         });
     }
 }
-export function build(input, output) {
+exports.evalRoutes = evalRoutes;
+function build(input, output) {
     fs.rmSync(buildLocation, { recursive: true, force: true });
     transpileRoutes(input);
     evalRoutes(output);
 }
+exports.build = build;

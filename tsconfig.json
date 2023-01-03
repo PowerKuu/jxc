@@ -1,9 +1,10 @@
 {
     "compilerOptions": {
-        "target": "ESNEXT",
+        "target": "ESNext",
+        "module": "CommonJS",
         "jsx": "preserve",
 
-        "jsxFactory": "factory",
+        "jsxFactory": "_compiler.factory",
 
         "moduleResolution": "Node",
 

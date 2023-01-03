@@ -7,7 +7,6 @@
     "@babel/preset-typescript": "^7.18.6",
     "babel-plugin-prepend": "^1.0.2",
     "child_process": "^1.0.2",
-    "crypto": "^1.0.1",
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "typescript": "^4.9.4",
@@ -19,7 +18,7 @@
     "@types/uglify-js": "^3.17.1"
   },
   "name": "@klevn/compile-jsx",
-  "version": "1.0.2",
+  "version": "1.0.9",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": {

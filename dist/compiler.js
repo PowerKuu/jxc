@@ -1,7 +1,10 @@
-import { minify } from "uglify-js";
-import { join, resolve } from "path";
-import { mkdirSync, writeFileSync } from "fs";
-import * as crypto from "crypto";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.factory = exports.construct = exports.compile = void 0;
+const uglify_js_1 = require("uglify-js");
+const path_1 = require("path");
+const fs_1 = require("fs");
+const crypto = require("crypto");
 const defaultBundel = {
     script: "",
     style: ""
@@ -12,7 +15,7 @@ function stringifyFunction(func, args = [], defer = false) {
         return JSON.stringify(args).slice(1, -1);
     }
     const funcString = func.toString();
-    const funcMinify = minify(funcString, {
+    const funcMinify = (0, uglify_js_1.minify)(funcString, {
         "compress": false,
     });
     const funcMinifyString = funcMinify.error ?
@@ -79,25 +82,27 @@ function compileChildren(element) {
     }
     return childrenArray.join("").trim();
 }
-export function compile(element) {
+function compile(element) {
     var contentString = compileChildren(element);
     var attributesString = compileAttributes(element);
     return `<${element.tag} id="${element.id}"${attributesString}>${contentString}</${element.tag}>`;
 }
-export function construct(options) {
+exports.compile = compile;
+function construct(options) {
     bundel = defaultBundel;
-    const dirPath = resolve(__dirname, options.outDir);
-    const fullPath = join(dirPath, "index.html");
-    mkdirSync(dirPath, { recursive: true });
+    const dirPath = (0, path_1.resolve)(__dirname, options.outDir);
+    const fullPath = (0, path_1.join)(dirPath, "index.html");
+    (0, fs_1.mkdirSync)(dirPath, { recursive: true });
     const compiled = compile(options.element);
-    writeFileSync(fullPath, [
+    (0, fs_1.writeFileSync)(fullPath, [
         "<!DOCTYPE html>",
         `<script>${bundel.script}</script>`,
         `<style>${bundel.style}</style>`,
         compiled
     ].join("\n"));
 }
-export function factory(tag, attributes, ...children) {
+exports.construct = construct;
+function factory(tag, attributes, ...children) {
     // If component
     if (typeof tag == "function")
         return tag({ ...attributes, children });
@@ -108,3 +113,4 @@ export function factory(tag, attributes, ...children) {
         id: crypto.randomUUID()
     };
 }
+exports.factory = factory;
