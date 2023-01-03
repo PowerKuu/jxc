@@ -5,7 +5,8 @@ const child_process_1 = require("child_process");
 const path_1 = require("path");
 const compiler_1 = require("./compiler");
 const fs = require("fs");
-const buildLocation = (0, path_1.join)(__dirname, "babel", ".build");
+const buildLocation = (0, path_1.join)(__dirname, ".build");
+const babelConfigPath = (0, path_1.resolve)(__dirname, "../babel.config.js");
 const createBuildLocation = () => fs.mkdirSync(buildLocation, { recursive: true });
 const tryCatch = (func) => {
     try {
@@ -17,7 +18,6 @@ const tryCatch = (func) => {
 };
 function transpileRoutes(input) {
     const output = buildLocation;
-    const babelConfigPath = (0, path_1.join)(__dirname, "babel", "babel.config.js");
     //const command = `npx babel routes --extensions ".tsx,.jsx,.ts,.js" --out-file-extension .js --out-dir dist --copy-files --config-file ${babelConfigPath}`
     const command = [
         "npx", "babel", input,

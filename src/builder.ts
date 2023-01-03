@@ -1,11 +1,11 @@
 import { execSync } from "child_process"
-import { join } from "path"
+import { join, resolve } from "path"
 import { construct } from "./compiler"
 
 import * as fs from "fs"
 
-const buildLocation = join(__dirname, "babel", ".build")
-
+const buildLocation = join(__dirname, ".build")
+const babelConfigPath = resolve(__dirname, "../babel.config.js")
 
 const createBuildLocation = () =>  fs.mkdirSync(buildLocation, {recursive: true})
 
@@ -19,7 +19,6 @@ const tryCatch = (func:Function) => {
 
 export function transpileRoutes(input:string) {
     const output = buildLocation
-    const babelConfigPath = join(__dirname, "babel", "babel.config.js")
 
     //const command = `npx babel routes --extensions ".tsx,.jsx,.ts,.js" --out-file-extension .js --out-dir dist --copy-files --config-file ${babelConfigPath}`
 
