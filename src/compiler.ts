@@ -1,18 +1,17 @@
-import { Attributes, BuildOptions, Child, Element, Elements } from "./types"
-
 import { minify } from "uglify-js"
-
 import { join, resolve } from "path"
 import { mkdirSync, writeFileSync } from "fs"
 
 import * as crypto from "crypto"
 
-const bundel = {
+const defaultBundel = {
     script: "",
     style: ""
 }
 
-function stringifyFunction(func: (...args:any[]) => any, args:any[] = [], defer = false) {
+var bundel = defaultBundel
+
+function stringifyFunction(func: Function, args:any[] = [], defer = false) {
     function proccessArgs(args:any[]){
         return JSON.stringify(args).slice(1, -1)
     }
@@ -48,7 +47,7 @@ function getClientFunction(name:string):string {
 }
 
 
-function compileAttributes(element: Element<Child<any>>): string {
+function compileAttributes(element: JSX.Element): string {
     function createAttribute(key:string, value:string) {
         return `${key}=${encapsolateString(String(value))}`
     }
@@ -94,7 +93,7 @@ function compileAttributes(element: Element<Child<any>>): string {
 
 
 
-function compileChildren(element: Element<Child<any>>): string {
+function compileChildren(element: JSX.Element): string {
     var childrenArray:string[] = []
 
     for (var child of element.children) {
@@ -102,7 +101,7 @@ function compileChildren(element: Element<Child<any>>): string {
             childrenArray.push(child)
             continue
         } 
-        else if (element.tag == "script") {
+        else if (element.tag == "script" || typeof child == "function") {
             const execString = stringifyFunction(
                 child, 
                 element.attributes.args,
@@ -119,39 +118,42 @@ function compileChildren(element: Element<Child<any>>): string {
     return childrenArray.join("").trim()
 }
 
-export function compile(element: Element<any>): string {
+export function compile(element: JSX.Element): string {
     var contentString:string = compileChildren(element)
     var attributesString:string = compileAttributes(element)
 
-    return `<${element.tag} id="${element.elementID}"${attributesString}>${contentString}</${element.tag}>`
+    return `<${element.tag} id="${element.id}"${attributesString}>${contentString}</${element.tag}>`
 }
 
 
-export function build(options: BuildOptions) {
-    for (var [path, element] of Object.entries(options.paths)){
-        const dirPath = resolve(__dirname, options.outDir, path)
-        const fullPath = join(dirPath, "index.html")
+export function construct(options: Compiler.ConstructionOptions) {
+    bundel = defaultBundel
 
-        mkdirSync(dirPath, {recursive: true})
 
-        const compiled = compile(element)
+    const dirPath = resolve(__dirname, options.outDir)
+    const fullPath = join(dirPath, "index.html")
 
-        writeFileSync(fullPath, [
-            "<!DOCTYPE html>",
-            `<script>${bundel.script}</script>`,
-            `<style>${bundel.style}</style>`,
-            compiled
-        ].join("\n"))
-    }
+    mkdirSync(dirPath, {recursive: true})
+    const compiled = compile(options.element)
+
+    writeFileSync(fullPath, [
+        "<!DOCTYPE html>",
+        `<script>${bundel.script}</script>`,
+        `<style>${bundel.style}</style>`,
+        compiled
+    ].join("\n"))
 }
 
-export function factory<Tag extends keyof Elements>(tag:Tag, attributes:Attributes|null, ...children: Elements[Tag][]):Element<Elements[Tag]> {
+export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Function, attributes:JSX.Attributes|null, ...children: JSX.Children[]):JSX.Element {
+    // If component
+    if (typeof tag == "function") return tag({...attributes, children})
+    
     return {
         tag: tag,
         attributes: attributes ?? {},
         children: children,
         
-        elementID: crypto.randomUUID()
+        id: crypto.randomUUID()
     }
 }
 

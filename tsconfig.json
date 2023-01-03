@@ -2,7 +2,16 @@
     "compilerOptions": {
         "target": "ESNEXT",
         "jsx": "preserve",
+
+        "jsxFactory": "factory",
+
+        "moduleResolution": "Node",
+
+        "outDir": "dist",
+        "declaration": true,
+        "declarationMap": true
     },
 
-    "include": ["src"]
+    "files": ["./src/types/jsx.d.ts", "./src/types/index.d.ts"],
+    "include": ["src", "src/.cli.ts"],
 }
