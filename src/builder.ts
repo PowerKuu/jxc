@@ -7,7 +7,6 @@ import * as fs from "fs"
 const buildLocation = join(__dirname, ".build")
 const babelConfigPath = resolve(__dirname, "../babel.config.js")
 
-const createBuildLocation = () =>  fs.mkdirSync(buildLocation, {recursive: true})
 
 const tryCatch = (func:Function) => {
     try {
@@ -77,11 +76,15 @@ export function evalRoutes(output:string) {
 }
 
 export function build(input:string, output:string) {
-    fs.rmSync(buildLocation, {recursive: true, force: true})
-    createBuildLocation()
+    if (fs.existsSync(buildLocation)) fs.rmSync(buildLocation, 
+        {recursive: true, force: true}
+    )
+
+    fs.mkdirSync(input, {recursive: true})
+    fs.mkdirSync(output, {recursive: true})
+    fs.mkdirSync(buildLocation, {recursive: true})
 
     transpileRoutes(input)
     evalRoutes(output)
 }
 
-createBuildLocation()

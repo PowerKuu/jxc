@@ -7,7 +7,6 @@ const compiler_1 = require("./compiler");
 const fs = require("fs");
 const buildLocation = (0, path_1.join)(__dirname, ".build");
 const babelConfigPath = (0, path_1.resolve)(__dirname, "../babel.config.js");
-const createBuildLocation = () => fs.mkdirSync(buildLocation, { recursive: true });
 const tryCatch = (func) => {
     try {
         return func();
@@ -65,10 +64,12 @@ function evalRoutes(output) {
 }
 exports.evalRoutes = evalRoutes;
 function build(input, output) {
-    fs.rmSync(buildLocation, { recursive: true, force: true });
-    createBuildLocation();
+    if (fs.existsSync(buildLocation))
+        fs.rmSync(buildLocation, { recursive: true, force: true });
+    fs.mkdirSync(input, { recursive: true });
+    fs.mkdirSync(output, { recursive: true });
+    fs.mkdirSync(buildLocation, { recursive: true });
     transpileRoutes(input);
     evalRoutes(output);
 }
 exports.build = build;
-createBuildLocation();
