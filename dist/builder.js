@@ -6,6 +6,7 @@ const path_1 = require("path");
 const compiler_1 = require("./compiler");
 const fs = require("fs");
 const buildLocation = (0, path_1.join)(__dirname, "babel", ".build");
+const createBuildLocation = () => fs.mkdirSync(buildLocation, { recursive: true });
 const tryCatch = (func) => {
     try {
         return func();
@@ -65,7 +66,9 @@ function evalRoutes(output) {
 exports.evalRoutes = evalRoutes;
 function build(input, output) {
     fs.rmSync(buildLocation, { recursive: true, force: true });
+    createBuildLocation();
     transpileRoutes(input);
     evalRoutes(output);
 }
 exports.build = build;
+createBuildLocation();
