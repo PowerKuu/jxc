@@ -18,8 +18,8 @@
     "@types/node": "^18.11.18",
     "@types/uglify-js": "^3.17.1"
   },
-  "name": "@klevn/compile-jsx",
-  "version": "5.0.8",
+  "name": "@klevn/jxc",
+  "version": "5.0.9",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": {
@@ -29,8 +29,8 @@
     "build": "npx tsc && npx copyfiles -u 1 --exclude src/**/*.ts src/**/* dist/",
     "update": "npm run build && npm publish --access=public"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["compile", "jsx", "tsx", "compile-jsx", "compile-tsx"],
+  "author": "Klevn",
   "license": "ISC",
-  "description": ""
+  "description": "A javascript tool to compile tsx and jsx files to static index.html files on the server. It uses babel and a custom compiler."
 }

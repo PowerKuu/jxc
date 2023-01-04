@@ -1,6 +1,6 @@
 const path = require("path")
 
-const package = "@klevn/compile-jsx"
+const package = "@klevn/jxc"
 
 module.exports = {
     "presets": ["@babel/preset-typescript"],
