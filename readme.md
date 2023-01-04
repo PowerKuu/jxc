@@ -64,7 +64,7 @@ cd ../..
 npx @klevn/jxc build
 ```
 
-## U can store static assets in the "public" route
+## U can store static assets in the "public" route:
 - css
 - img
 - svg
