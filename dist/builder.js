@@ -36,7 +36,7 @@ function evalRoutes(output) {
     const publicDir = (0, path_1.join)(input, "public");
     const publicDirExists = fs.existsSync(publicDir);
     if (publicDirExists) {
-        fs.cpSync(publicDir, output, { recursive: true });
+        fs.cpSync(publicDir, (0, path_1.join)(output, "public"), { recursive: true });
     }
     for (var dirName of dirs) {
         if (dirName === "public")

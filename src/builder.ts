@@ -18,7 +18,7 @@ const tryCatch = (func:Function) => {
 
 export function transpileRoutes(input:string) {
     const output = buildLocation
-    
+
     const command = [
         "npx", "babel", input,
         "--out-dir", output,
@@ -42,7 +42,7 @@ export function evalRoutes(output:string) {
     const publicDirExists = fs.existsSync(publicDir)
 
     if (publicDirExists) {
-        fs.cpSync(publicDir, output, {recursive: true})
+        fs.cpSync(publicDir, join(output, "public"), {recursive: true})
     }
 
     for (var dirName of dirs) {
