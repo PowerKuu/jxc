@@ -18,9 +18,7 @@ const tryCatch = (func:Function) => {
 
 export function transpileRoutes(input:string) {
     const output = buildLocation
-
-    //const command = `npx babel routes --extensions ".tsx,.jsx,.ts,.js" --out-file-extension .js --out-dir dist --copy-files --config-file ${babelConfigPath}`
-
+    
     const command = [
         "npx", "babel", input,
         "--out-dir", output,
@@ -51,7 +49,7 @@ export function evalRoutes(output:string) {
         if (dirName === "public") continue
 
         const inPath = join(input, dirName)
-        const outPath = join(output, dirName)
+        const outPath = dirName === "index" ? output : join(output, dirName)
 
         const rootComponent = tryCatch(() => require(join(inPath, "index.js")).default)
         if (!rootComponent) continue
