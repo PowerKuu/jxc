@@ -19,7 +19,7 @@
     "@types/uglify-js": "^3.17.1"
   },
   "name": "@klevn/compile-jsx",
-  "version": "4.0.9",
+  "version": "5.0.8",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": {

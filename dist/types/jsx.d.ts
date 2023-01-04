@@ -1,6 +1,6 @@
 
 declare namespace JSX {
-  type Children = string|Function
+  type Children = string|Function|Element
 
   interface Element {
     tag: keyof IntrinsicElements,

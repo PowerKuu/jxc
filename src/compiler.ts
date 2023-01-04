@@ -52,7 +52,7 @@ function compileAttributes(element: JSX.Element): string {
         return `${key}=${encapsolateString(String(value))}`
     }
     
-    const excludeList = ["args"]
+    const excludeList = ["args", "id"]
     
     function encapsolateString(str:string) {
         str = str.split("").map((value) => {
@@ -94,6 +94,8 @@ function compileAttributes(element: JSX.Element): string {
 
 
 function compileChildren(element: JSX.Element): string {
+    if (element.children == undefined) return ""
+    
     var childrenArray:string[] = []
 
     for (var child of element.children) {
@@ -101,7 +103,7 @@ function compileChildren(element: JSX.Element): string {
             childrenArray.push(child)
             continue
         } 
-        else if (element.tag == "script" || typeof child == "function") {
+        else if (element.tag == "script" && typeof child == "function") {
             const execString = stringifyFunction(
                 child, 
                 element.attributes.args,
@@ -109,6 +111,8 @@ function compileChildren(element: JSX.Element): string {
             )
 
             childrenArray.push(execString)
+            continue
+        } else if (typeof child == "function") {
             continue
         }
 
@@ -145,15 +149,17 @@ export function construct(options: Compiler.ConstructionOptions) {
 }
 
 export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Function, attributes:JSX.Attributes|null, ...children: JSX.Children[]):JSX.Element {
-    // If component
-    if (typeof tag == "function") return tag({...attributes, children})
+    // Convert to 1D
+    children = [].concat(...children)
+
+    if (typeof tag == "function") return tag({...attributes, children: children})
     
     return {
         tag: tag,
         attributes: attributes ?? {},
         children: children,
         
-        id: crypto.randomUUID()
+        id: attributes?.id ?? crypto.randomUUID()
     }
 }
 

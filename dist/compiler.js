@@ -40,7 +40,7 @@ function compileAttributes(element) {
     function createAttribute(key, value) {
         return `${key}=${encapsolateString(String(value))}`;
     }
-    const excludeList = ["args"];
+    const excludeList = ["args", "id"];
     function encapsolateString(str) {
         str = str.split("").map((value) => {
             if (value == `"`)
@@ -67,15 +67,20 @@ function compileAttributes(element) {
     return attributesArray.join("").trim();
 }
 function compileChildren(element) {
+    if (element.children == undefined)
+        return "";
     var childrenArray = [];
     for (var child of element.children) {
         if (typeof child == "string") {
             childrenArray.push(child);
             continue;
         }
-        else if (element.tag == "script" || typeof child == "function") {
+        else if (element.tag == "script" && typeof child == "function") {
             const execString = stringifyFunction(child, element.attributes.args, element.attributes.defer);
             childrenArray.push(execString);
+            continue;
+        }
+        else if (typeof child == "function") {
             continue;
         }
         childrenArray.push(compile(child));
@@ -103,14 +108,15 @@ function construct(options) {
 }
 exports.construct = construct;
 function factory(tag, attributes, ...children) {
-    // If component
+    // Convert to 1D
+    children = [].concat(...children);
     if (typeof tag == "function")
-        return tag({ ...attributes, children });
+        return tag({ ...attributes, children: children });
     return {
         tag: tag,
         attributes: attributes ?? {},
         children: children,
-        id: crypto.randomUUID()
+        id: attributes?.id ?? crypto.randomUUID()
     };
 }
 exports.factory = factory;
