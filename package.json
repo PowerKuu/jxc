@@ -5,10 +5,12 @@
     "@babel/plugin-transform-modules-commonjs": "^7.20.11",
     "@babel/plugin-transform-react-jsx": "^7.20.7",
     "@babel/preset-typescript": "^7.18.6",
+    "@compodoc/live-server": "^1.2.3",
     "babel-plugin-prepend": "^1.0.2",
     "child_process": "^1.0.2",
     "copyfiles": "^2.4.1",
     "fs": "^0.0.1-security",
+    "node-watch": "^0.7.3",
     "path": "^0.12.7",
     "typescript": "^4.9.4",
     "uglify-js": "^3.17.4"
@@ -19,17 +21,21 @@
     "@types/uglify-js": "^3.17.1"
   },
   "name": "@klevn/jxc",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
-  "bin": {
-    "build": "./dist/cli/build.js"
-  },
+  "bin": "./dist/cli/barrel.js",
   "scripts": {
     "build": "npx tsc && npx copyfiles -u 1 --exclude src/**/*.ts src/**/* dist/",
     "update": "npm run build && npm publish --access=public"
   },
-  "keywords": ["compile", "jsx", "tsx", "compile-jsx", "compile-tsx"],
+  "keywords": [
+    "compile",
+    "jsx",
+    "tsx",
+    "compile-jsx",
+    "compile-tsx"
+  ],
   "author": "Klevn",
   "license": "ISC",
   "description": "A javascript tool to compile tsx and jsx files to static index.html files on the server. It uses babel and a custom compiler."
