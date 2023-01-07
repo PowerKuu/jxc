@@ -1,9 +1,12 @@
+
+/*
 import { join, resolve } from "path"
 import { argv, cwd } from "process"
 import { build } from "../builder"
 
-import watch from "node-watch"
+//import watch from "node-watch"
 import * as liveServer from "@compodoc/live-server"
+import { watch } from "fs"
 
 export default () => {
     const input = resolve(cwd(), argv[3] ?? "./routes")
@@ -11,22 +14,24 @@ export default () => {
 
     console.log(`Starting dev server input: ${input}, output: ${output}.`)
 
-    watch(input, {recursive: true, delay: 750}, () => {
+    build(input, output)
+
+    const watcher = watch(input, {recursive: true, persistent: true})
+
+    watcher.on("change", () => {
+        const date = new Date()
+        const formatedDate = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`
+
+        console.log(`${formatedDate} - New live server reload.`)
+
         build(input, output)
     })
 
     liveServer.start({
-        root: output,
-        middleware: [
-            (req:any, res:any, next:any) => {
-                const date = new Date()
-                const formatedDate = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`
-
-                console.log(`${formatedDate} - New live server reload.`)
-                next()
-            },
-        ]
+        root: output
     })
 
     console.log(`Edit ${input} for live updates.`)
 }
+
+*/

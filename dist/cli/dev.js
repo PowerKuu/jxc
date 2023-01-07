@@ -1,27 +1,36 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const path_1 = require("path");
-const process_1 = require("process");
-const builder_1 = require("../builder");
-const node_watch_1 = require("node-watch");
-const liveServer = require("@compodoc/live-server");
-exports.default = () => {
-    const input = (0, path_1.resolve)((0, process_1.cwd)(), process_1.argv[3] ?? "./routes");
-    const output = process_1.argv[4] ? (0, path_1.resolve)((0, process_1.cwd)(), process_1.argv[4]) : (0, path_1.join)(__dirname, ".dist");
-    console.log(`Starting dev server input: ${input}, output: ${output}.`);
-    (0, node_watch_1.default)(input, { recursive: true, delay: 750 }, () => {
-        (0, builder_1.build)(input, output);
-    });
+/*
+import { join, resolve } from "path"
+import { argv, cwd } from "process"
+import { build } from "../builder"
+
+//import watch from "node-watch"
+import * as liveServer from "@compodoc/live-server"
+import { watch } from "fs"
+
+export default () => {
+    const input = resolve(cwd(), argv[3] ?? "./routes")
+    const output = argv[4] ? resolve(cwd(), argv[4]) : join(__dirname, ".dist")
+
+    console.log(`Starting dev server input: ${input}, output: ${output}.`)
+
+    build(input, output)
+
+    const watcher = watch(input, {recursive: true, persistent: true})
+
+    watcher.on("change", () => {
+        const date = new Date()
+        const formatedDate = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`
+
+        console.log(`${formatedDate} - New live server reload.`)
+
+        build(input, output)
+    })
+
     liveServer.start({
-        root: output,
-        middleware: [
-            (req, res, next) => {
-                const date = new Date();
-                const formatedDate = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
-                console.log(`${formatedDate} - New live server reload.`);
-                next();
-            },
-        ]
-    });
-    console.log(`Edit ${input} for live updates.`);
-};
+        root: output
+    })
+
+    console.log(`Edit ${input} for live updates.`)
+}
+
+*/ 

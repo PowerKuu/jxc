@@ -2,16 +2,15 @@
 
 import { argv } from "process"
 import build from "./build"
-import dev from "./dev"
+//import dev from "./dev"
 
 
 switch (argv[2].toLowerCase()) {
     case "build":
         build()
-
-    case "dev":
-        dev()
+        break
 
     default:
-        console.log("Use build/dev as an argument.")
+        console.log("Use an argument.")
+        break
 }
