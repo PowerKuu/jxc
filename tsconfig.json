@@ -14,5 +14,5 @@
     },
 
     "files": ["./src/types/jsx.d.ts", "./src/types/index.d.ts"],
-    "include": ["src", "src/.cli.ts"],
+    "include": ["src", "src/cli/.cli.ts", "src/cli/.cli.ts"],
 }
