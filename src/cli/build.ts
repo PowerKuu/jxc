@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { resolve } from "path"
 import { argv, cwd } from "process"
 import { build } from "../builder"

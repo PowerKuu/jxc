@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { argv } from "process"
 import build from "./build"
 import dev from "./dev"
