@@ -1,5 +1,5 @@
-const t = require('@babel/types')
-const babelTemplate = require('@babel/template').default
+const t = require("@babel/types")
+const babelTemplate = require("@babel/template").default
 
 const { createSyncFn } = require("synckit")
 const requireResolve = require("require-resolve")
@@ -25,10 +25,10 @@ function CssImportVisitor(callback) {
             importNameSplit[importNameSplit.length - 1] !== "css"
         ) return
 
-        const { src } = requireResolve(node.source.value, resolve(file.opts.filename));
-        
+        const resolved = requireResolve(node.source.value, resolve(file.opts.filename));
+        if (!resolved.src) throw Error(`No import with name: ${importName}.`)
 
-        callback(src, {...node, ...node.specifiers[0]}, babelData)
+        callback(resolved.src, {...node, ...node.specifiers[0]}, babelData)
     }
 }
 
@@ -36,7 +36,7 @@ function createConstAst(tokens, importNode) {
     const node = t.valueToNode(tokens)
     const name = t.identifier(importNode.local.name)
 
-    return babelTemplate('const ID = VALUE')({ ID: name, VALUE: node })
+    return babelTemplate("const ID = VALUE")({ ID: name, VALUE: node })
 }
 
 function createBundelAst(code) {
@@ -57,7 +57,7 @@ module.exports = () => {
                     if (!fileExists) return
 
                     const rawCss = fs.readFileSync(src, { encoding: "utf-8" })
-                    const { css, tokens } = IsolateCssWorker(rawCss, src)
+                    const { css, tokens } = IsolateCssWorker(rawCss, src, !!!importNode.local)
 
                     if (importNode.local) {
                         babelData.replaceWithMultiple([

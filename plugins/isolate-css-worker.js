@@ -1,15 +1,22 @@
 const postcss = require("postcss")
 const postcssModules = require("postcss-modules")({
     generateScopedName: "[name]__[local]___[hash:base64:5]",
-    getJSON: () => {
+    getJSON: () => {}
+})
 
-    }
+const postcssNano = require("cssnano")({
+    preset: "default",
 })
 
 const { runAsWorker } = require("synckit")
 
-async function IsolateCss(css, src = undefined) {
-    const runner = postcss([postcssModules])
+async function IsolateCss(css, src, preserve) {
+    const plugins = []
+
+    plugins.push(postcssNano)
+    if (!preserve) plugins.push(postcssModules)
+
+    const runner = postcss(plugins)
     const processed = await runner.process(css, { from: src })
 
     var processedCss = processed.css
