@@ -35,8 +35,12 @@ function evalRoutes(output) {
         .map(dirent => dirent.name);
     function copyFiles(inPath, outPath) {
         const paths = fs.readdirSync(inPath, { withFileTypes: true });
-        if (paths.length > 0)
-            fs.mkdirSync(outPath, { recursive: true });
+        var hasCreatedOut = false;
+        function insureOutExist() {
+            if (hasCreatedOut == false)
+                fs.mkdirSync(outPath, { recursive: true });
+            hasCreatedOut = true;
+        }
         for (var path of paths) {
             const source = (0, path_1.join)(inPath, path.name);
             const destination = (0, path_1.join)(outPath, path.name);
@@ -51,16 +55,11 @@ function evalRoutes(output) {
                 continue;
             if ((0, path_1.parse)(path.name).ext == ".js" && isClientSide == false)
                 continue;
+            insureOutExist();
             fs.copyFileSync(source, destination);
         }
     }
-    //const publicDir = join(input, "public")
-    //const publicDirExists = fs.existsSync(publicDir)
-    //if (publicDirExists) {
-    //    fs.cpSync(publicDir, join(output, "public"), {recursive: true})
-    //}
     for (var dirName of dirs) {
-        //if (dirName === "public") continue
         const inPath = (0, path_1.join)(input, dirName);
         const outPath = dirName === "index" ? output : (0, path_1.join)(output, dirName);
         copyFiles(inPath, outPath);

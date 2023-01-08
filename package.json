@@ -20,7 +20,7 @@
     "@types/uglify-js": "^3.17.1"
   },
   "name": "@klevn/jxc",
-  "version": "10.0.5",
+  "version": "11.0.0",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": "./dist/cli/barrel.js",
