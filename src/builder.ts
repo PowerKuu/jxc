@@ -1,5 +1,5 @@
 import { execSync } from "child_process"
-import { join, resolve } from "path"
+import { join, parse, resolve } from "path"
 import { construct } from "./compiler"
 
 import * as fs from "fs"
@@ -38,18 +38,47 @@ export function evalRoutes(output:string) {
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name)
 
-    const publicDir = join(input, "public")
-    const publicDirExists = fs.existsSync(publicDir)
 
-    if (publicDirExists) {
-        fs.cpSync(publicDir, join(output, "public"), {recursive: true})
+    function copyFiles(inPath:string, outPath:string) {
+        const paths = fs.readdirSync(inPath, {withFileTypes: true})
+
+        if (paths.length > 0) fs.mkdirSync(outPath, {recursive: true})
+
+        for (var path of paths) {
+            const source = join(inPath, path.name)
+            const destination = join(outPath, path.name)
+
+            if (path.isDirectory()) {
+                copyFiles(source, destination)
+                continue
+            }
+
+            const pathSplit = path.name.split(".")
+
+            const isClientSide = pathSplit.length >= 3 && pathSplit[0] == "client"
+            const isServerSide = pathSplit.length >= 3 && pathSplit[0] == "server"
+
+            if (isServerSide) continue
+            if (parse(path.name).ext == ".js" && isClientSide == false) continue
+
+            fs.copyFileSync(source, destination)
+        }
     }
 
+    //const publicDir = join(input, "public")
+    //const publicDirExists = fs.existsSync(publicDir)
+
+    //if (publicDirExists) {
+    //    fs.cpSync(publicDir, join(output, "public"), {recursive: true})
+    //}
+
     for (var dirName of dirs) {
-        if (dirName === "public") continue
+        //if (dirName === "public") continue
 
         const inPath = join(input, dirName)
         const outPath = dirName === "index" ? output : join(output, dirName)
+
+        copyFiles(inPath, outPath)
 
         const rootComponent = tryCatch(() => require(join(inPath, "index.js")).default)
         if (!rootComponent) continue
