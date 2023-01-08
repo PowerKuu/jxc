@@ -5,6 +5,8 @@ const package = "@klevn/jxc"
 module.exports = {
     "presets": ["@babel/preset-typescript"],
     "plugins": [
+      "./plugins/css",
+      
       [
         "@babel/plugin-transform-react-jsx",
         {
@@ -30,6 +32,5 @@ module.exports = {
           }
         }
       ]
-      //babel-plugin-transform-import-css
     ]
 }

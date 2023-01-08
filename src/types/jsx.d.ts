@@ -1,4 +1,3 @@
-
 declare namespace JSX {
   type Children = string|Function|Element
 

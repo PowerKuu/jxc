@@ -49,11 +49,14 @@ function evalRoutes(output) {
                 continue;
             }
             const pathSplit = path.name.split(".");
-            const isClientSide = pathSplit.length >= 3 && pathSplit[0] == "client";
-            const isServerSide = pathSplit.length >= 3 && pathSplit[0] == "server";
+            const isClientSide = pathSplit.length >= 3 && pathSplit[0] === "client";
+            const isServerSide = pathSplit.length >= 3 && pathSplit[0] === "server";
+            const isModuleCss = pathSplit.length >= 3 && pathSplit[pathSplit.length - 1] === "css" && pathSplit[pathSplit.length - 2] === "module";
             if (isServerSide)
                 continue;
             if ((0, path_1.parse)(path.name).ext == ".js" && isClientSide == false)
+                continue;
+            if (isModuleCss && isClientSide == false)
                 continue;
             insureOutExist();
             fs.copyFileSync(source, destination);

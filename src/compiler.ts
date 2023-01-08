@@ -122,13 +122,21 @@ function compileChildren(element: JSX.Element): string {
     return childrenArray.join("").trim()
 }
 
+export function appendStyleBundel(style:string) {
+    bundel.style += style
+}
+
+export function appendScriptBundel(script:string) {
+    bundel.script += script
+}
+
+
 export function compile(element: JSX.Element): string {
     var contentString:string = compileChildren(element)
     var attributesString:string = compileAttributes(element)
 
     return `<${element.tag} id="${element.id}"${attributesString}>${contentString}</${element.tag}>`
 }
-
 
 export function construct(options: Compiler.ConstructionOptions) {
     bundel = defaultBundel

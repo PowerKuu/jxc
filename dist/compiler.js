@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.factory = exports.construct = exports.compile = void 0;
+exports.factory = exports.construct = exports.compile = exports.appendScriptBundel = exports.appendStyleBundel = void 0;
 const uglify_js_1 = require("uglify-js");
 const path_1 = require("path");
 const fs_1 = require("fs");
@@ -87,6 +87,14 @@ function compileChildren(element) {
     }
     return childrenArray.join("").trim();
 }
+function appendStyleBundel(style) {
+    bundel.style += style;
+}
+exports.appendStyleBundel = appendStyleBundel;
+function appendScriptBundel(script) {
+    bundel.script += script;
+}
+exports.appendScriptBundel = appendScriptBundel;
 function compile(element) {
     var contentString = compileChildren(element);
     var attributesString = compileAttributes(element);

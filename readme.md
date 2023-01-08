@@ -2,7 +2,12 @@
 
 A javascript "framwork" to compile tsx and jsx files to static index.html files on the server. It uses Babel and a custom compiler.
 
-## Setup proccess:
+## Template setup proccess:
+```sh
+npx degit PowerKuu/templates/jxc <name> 
+```
+
+## Manual setup proccess:
 
 -   Create a new empty folder
 ```sh
@@ -64,8 +69,11 @@ cd ../..
 npx @klevn/jxc build
 ```
 
-## U can store static assets in the "public" route:
-- css
-- img
-- svg
-- ...etc
+- Use modules css or regular classes
+```tsx
+import styles from "./test.module.css"
+
+function Component() {
+    return <p class={[styles.text]}></p>
+}
+```
