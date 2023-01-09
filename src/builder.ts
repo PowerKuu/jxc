@@ -7,6 +7,7 @@ import * as fs from "fs"
 const buildLocation = join(__dirname, ".build")
 const babelConfigPath = resolve(__dirname, "../babel.config.js")
 
+const fileClientBlacklist = [".js", ".css"]
 
 const tryCatch = (func:Function) => {
     try {
@@ -86,17 +87,15 @@ export function evalRoutes(output:string) {
 
             const isClientSide = pathSplit.length >= 3 && pathSplit[0] === "client"
             const isServerSide = pathSplit.length >= 3 && pathSplit[0] === "server"
-            const isModuleCss = pathSplit.length >= 3 && pathSplit[pathSplit.length-1] === "css" && pathSplit[pathSplit.length-2] === "module"
 
             if (isServerSide) continue
-            if (parse(path.name).ext == ".js" && isClientSide == false) continue
-            if (isModuleCss && isClientSide == false) continue
+            if (fileClientBlacklist.includes(parse(path.name).ext) && isClientSide == false) continue
 
             insureOutExist()
             fs.copyFileSync(source, destination)
         }
     }
-    
+
     for (var dirName of dirs) {
         const inPath = join(input, dirName)
         const outPath = dirName === "index" ? output : join(output, dirName)

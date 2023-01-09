@@ -20,15 +20,19 @@ function CssImportVisitor(callback) {
 
 
         if (
-            importNameSplit.length <= 2 || 
-            importNameSplit[importNameSplit.length - 2] !== "module" ||
+            importNameSplit.length <= 1 ||
             importNameSplit[importNameSplit.length - 1] !== "css"
         ) return
 
         const resolved = requireResolve(node.source.value, resolve(file.opts.filename));
-        if (!resolved.src) throw Error(`No import with name: ${importName}.`)
+        if (!resolved || !resolve.src) throw Error(`No import with name: ${importName}.`)
 
-        callback(resolved.src, {...node, ...node.specifiers[0]}, babelData)
+        callback(
+            resolved.src, 
+            {...node, ...node.specifiers[0]}, 
+            babelData,
+            importNameSplit.length >= 3 && importNameSplit[importNameSplit.length - 2] === "module"
+        )
     }
 }
 
@@ -52,12 +56,12 @@ module.exports = () => {
     return {
         visitor: {
             ImportDeclaration: {
-                exit: CssImportVisitor((src, importNode, babelData) => {
+                exit: CssImportVisitor((src, importNode, babelData, isModule) => {
                     const fileExists = fs.existsSync(src)
                     if (!fileExists) return
 
                     const rawCss = fs.readFileSync(src, { encoding: "utf-8" })
-                    const { css, tokens } = IsolateCssWorker(rawCss, src, !!!importNode.local)
+                    const { css, tokens } = IsolateCssWorker(rawCss, src, !isModule)
 
                     if (importNode.local) {
                         babelData.replaceWithMultiple([

@@ -7,6 +7,7 @@ const compiler_1 = require("./compiler");
 const fs = require("fs");
 const buildLocation = (0, path_1.join)(__dirname, ".build");
 const babelConfigPath = (0, path_1.resolve)(__dirname, "../babel.config.js");
+const fileClientBlacklist = [".js", ".css"];
 const tryCatch = (func) => {
     try {
         return func();
@@ -70,12 +71,9 @@ function evalRoutes(output) {
             }
             const isClientSide = pathSplit.length >= 3 && pathSplit[0] === "client";
             const isServerSide = pathSplit.length >= 3 && pathSplit[0] === "server";
-            const isModuleCss = pathSplit.length >= 3 && pathSplit[pathSplit.length - 1] === "css" && pathSplit[pathSplit.length - 2] === "module";
             if (isServerSide)
                 continue;
-            if ((0, path_1.parse)(path.name).ext == ".js" && isClientSide == false)
-                continue;
-            if (isModuleCss && isClientSide == false)
+            if (fileClientBlacklist.includes((0, path_1.parse)(path.name).ext) && isClientSide == false)
                 continue;
             insureOutExist();
             fs.copyFileSync(source, destination);
