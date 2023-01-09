@@ -33,7 +33,7 @@ function evalRoutes(output) {
     const dirs = fs.readdirSync(input, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name);
-    function copyFiles(inPath, outPath) {
+    function buildPath(inPath, outPath) {
         const paths = fs.readdirSync(inPath, { withFileTypes: true });
         var hasCreatedOut = false;
         function insureOutExist() {
@@ -45,10 +45,29 @@ function evalRoutes(output) {
             const source = (0, path_1.join)(inPath, path.name);
             const destination = (0, path_1.join)(outPath, path.name);
             if (path.isDirectory()) {
-                copyFiles(source, destination);
+                buildPath(source, destination);
                 continue;
             }
             const pathSplit = path.name.split(".");
+            if (path.name == "index.js") {
+                const rootComponent = tryCatch(() => require(source).default);
+                if (!rootComponent)
+                    continue;
+                if (!(typeof rootComponent == "function")) {
+                    const err = `Path: ${dirName} does not export default a function!`;
+                    throw new Error(err);
+                }
+                const rootElement = rootComponent();
+                if (!rootElement.id) {
+                    const err = `Path: ${dirName} does not export default an element!`;
+                    throw new Error(err);
+                }
+                (0, compiler_1.construct)({
+                    outDir: outPath,
+                    element: rootElement
+                });
+                continue;
+            }
             const isClientSide = pathSplit.length >= 3 && pathSplit[0] === "client";
             const isServerSide = pathSplit.length >= 3 && pathSplit[0] === "server";
             const isModuleCss = pathSplit.length >= 3 && pathSplit[pathSplit.length - 1] === "css" && pathSplit[pathSplit.length - 2] === "module";
@@ -65,23 +84,7 @@ function evalRoutes(output) {
     for (var dirName of dirs) {
         const inPath = (0, path_1.join)(input, dirName);
         const outPath = dirName === "index" ? output : (0, path_1.join)(output, dirName);
-        copyFiles(inPath, outPath);
-        const rootComponent = tryCatch(() => require((0, path_1.join)(inPath, "index.js")).default);
-        if (!rootComponent)
-            continue;
-        if (!(typeof rootComponent == "function")) {
-            const err = `Path: ${dirName} does not export default a function!`;
-            throw new Error(err);
-        }
-        const rootElement = rootComponent();
-        if (!rootElement.id) {
-            const err = `Path: ${dirName} does not export default an element!`;
-            throw new Error(err);
-        }
-        (0, compiler_1.construct)({
-            outDir: outPath,
-            element: rootElement
-        });
+        buildPath(inPath, outPath);
     }
 }
 exports.evalRoutes = evalRoutes;

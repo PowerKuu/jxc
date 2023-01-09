@@ -39,7 +39,7 @@ export function evalRoutes(output:string) {
     .map(dirent => dirent.name)
 
 
-    function copyFiles(inPath:string, outPath:string) {
+    function buildPath(inPath:string, outPath:string) {
         const paths = fs.readdirSync(inPath, {withFileTypes: true})
         var hasCreatedOut = false
 
@@ -53,11 +53,36 @@ export function evalRoutes(output:string) {
             const destination = join(outPath, path.name)
 
             if (path.isDirectory()) {
-                copyFiles(source, destination)
+                buildPath(source, destination)
                 continue
             }
 
             const pathSplit = path.name.split(".")
+
+            if (path.name == "index.js"){
+                const rootComponent = tryCatch(() => require(source).default)
+            
+                if (!rootComponent) continue
+
+                if (!(typeof rootComponent == "function")) {
+                    const err = `Path: ${dirName} does not export default a function!`
+                    throw new Error(err)
+                }
+                
+                const rootElement:JSX.Element = rootComponent()
+        
+                if (!rootElement.id) {
+                    const err = `Path: ${dirName} does not export default an element!`
+                    throw new Error(err)
+                }
+        
+                construct({
+                    outDir: outPath,
+                    element: rootElement
+                })
+
+                continue
+            }
 
             const isClientSide = pathSplit.length >= 3 && pathSplit[0] === "client"
             const isServerSide = pathSplit.length >= 3 && pathSplit[0] === "server"
@@ -71,32 +96,12 @@ export function evalRoutes(output:string) {
             fs.copyFileSync(source, destination)
         }
     }
-
+    
     for (var dirName of dirs) {
         const inPath = join(input, dirName)
         const outPath = dirName === "index" ? output : join(output, dirName)
 
-        copyFiles(inPath, outPath)
-
-        const rootComponent = tryCatch(() => require(join(inPath, "index.js")).default)
-        if (!rootComponent) continue
-
-        if (!(typeof rootComponent == "function")) {
-            const err = `Path: ${dirName} does not export default a function!`
-            throw new Error(err)
-        }
-        
-        const rootElement:JSX.Element = rootComponent()
-
-        if (!rootElement.id) {
-            const err = `Path: ${dirName} does not export default an element!`
-            throw new Error(err)
-        }
-
-        construct({
-            outDir: outPath,
-            element: rootElement
-        })
+        buildPath(inPath, outPath)
     }
 }
 
