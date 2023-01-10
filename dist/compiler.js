@@ -30,7 +30,7 @@ function stringifyFunction(func, args = [], defer = false) {
 }
 function registerClientFunction(stringifiedFunction) {
     const randomUUID = crypto.randomUUID();
-    bundel.script += `window["${randomUUID}"]=function(){${stringifiedFunction}}`;
+    bundel.script += `window["${randomUUID}"]=function(){${stringifiedFunction}};`;
     return randomUUID;
 }
 function getClientFunction(name) {
