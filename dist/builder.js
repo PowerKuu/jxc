@@ -21,9 +21,9 @@ function transpileRoutes(input) {
     const command = [
         "npx", "babel", input,
         "--out-dir", output,
+        "--copy-files",
         "--extensions", ".tsx,.jsx,.ts,.js",
         "--out-file-extension", ".js",
-        "--copy-files",
         "--config-file", babelConfigPath
     ].join(" ");
     (0, child_process_1.execSync)(command);

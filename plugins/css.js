@@ -25,7 +25,7 @@ function CssImportVisitor(callback) {
         ) return
 
         const resolved = requireResolve(node.source.value, resolve(file.opts.filename));
-        if (!resolved || !resolve.src) throw Error(`No import with name: ${importName}.`)
+        if (!resolved || !resolved.src) throw Error(`No import with name: ${importName}.`)
 
         callback(
             resolved.src, 

@@ -1,4 +1,8 @@
+
+
 declare namespace JSX {
+  type CssType = import("csstype").PropertiesHyphen
+
   type Children = string|Function|Element
 
   interface Element {
@@ -190,16 +194,19 @@ declare namespace JSX {
 
 
   //type Child<T extends unknown> = (T|Element<Child<unknown>>)
-
-
   // Attributes
+  interface CSSProperties extends CssType {
+    // Override
+    [key: `-${string}`]: string | number | undefined
+  }
+
 
   type EventHandler<T> = (element:Element) => any
 
   interface Attributes {
       args?: unknown[]
       class?: string|string[]
-      style?: string
+      style?: string|CSSProperties
 
       onCopy?: EventHandler<ClipboardEvent>
       onCut?: EventHandler<ClipboardEvent>
@@ -373,3 +380,4 @@ declare namespace JSX {
       [key: string]: any
   }
 }
+

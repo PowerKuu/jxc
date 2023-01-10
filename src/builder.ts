@@ -23,9 +23,9 @@ export function transpileRoutes(input:string) {
     const command = [
         "npx", "babel", input,
         "--out-dir", output,
+        "--copy-files",
         "--extensions", ".tsx,.jsx,.ts,.js",
         "--out-file-extension", ".js",
-        "--copy-files",
         "--config-file", babelConfigPath
     ].join(" ")
 

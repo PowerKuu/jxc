@@ -10,6 +10,7 @@
     "babel-plugin-prepend": "^1.0.2",
     "child_process": "^1.0.2",
     "cssnano": "^5.1.14",
+    "csstype": "^3.1.1",
     "fs": "^0.0.1-security",
     "path": "^0.12.7",
     "postcss": "^8.4.21",
@@ -26,7 +27,7 @@
     "copyfiles": "^2.4.1"
   },
   "name": "@klevn/jxc",
-  "version": "20.0.0",
+  "version": "20.0.8",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": "./dist/cli/barrel.js",
