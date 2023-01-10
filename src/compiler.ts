@@ -1,8 +1,13 @@
-import { minify } from "uglify-js"
+import { minify as minifyJavascriptUnsafe } from "uglify-js"
+
 import { join, resolve } from "path"
-import { mkdirSync, writeFileSync } from "fs"
+import { mkdirSync, readFileSync, writeFileSync } from "fs"
 
 import * as crypto from "crypto"
+
+
+const CleanCss = require('clean-css')
+const cleanCss = new CleanCss()
 
 const defaultBundel = {
     script: "",
@@ -11,24 +16,68 @@ const defaultBundel = {
 
 var bundel = defaultBundel
 
+
+function minifyJavascript(str:string, trailingSemicolon:boolean):string {
+    const minified = minifyJavascriptUnsafe(str, {
+        "compress": false,
+    })
+    
+    if (minified.error) return
+
+    // Remove trailing ssemicolon
+    var code = minified.code
+
+    if (trailingSemicolon) {
+        code = !minified.code.endsWith(";") ? `${code};` : code
+    } else {
+        code = minified.code.endsWith(";") ? minified.code.slice(0,-1) : code
+    }
+    
+    return code
+}
+
+function minifyCss(str:string):string {
+    const minifed = cleanCss.minify(str)
+
+    if(minifed.errors.length > 0){
+        throw new Error(minifed.errors.join("\n"))
+    }
+    if(minifed.warnings.length > 0){
+        console.warn("Css warnings:", minifed.warnings.join("\n"))
+    }
+
+    return minifed.styles ?? ""
+}
+
+
+function createInitialBundle() {
+    const scriptBundelPath = join(__dirname, "bundel", "js.js")
+    const cssBundelPath = join(__dirname, "bundel", "css.css")
+    
+    defaultBundel.script += minifyJavascript(readFileSync(scriptBundelPath,  {
+        "encoding": "utf-8"
+    }), true)
+
+    defaultBundel.style += minifyCss(readFileSync(cssBundelPath,  {
+        "encoding": "utf-8"
+    }))
+}
+
+
+
 function stringifyFunction(func: Function, args:any[] = [], defer = false) {
     function proccessArgs(args:any[]){
         return JSON.stringify(args).slice(1, -1)
     }
 
     const funcString = func.toString()
-    const funcMinify = minify(funcString, {
-        "compress": false,
-    })
-
-    const funcMinifyString = funcMinify.error ? 
-    funcString : 
-    funcMinify.code.slice(0, -1)
+    const funcMinifyString = minifyJavascript(funcString, false) ?? funcString
     
     const stringArgs = args ? 
     proccessArgs(args) : 
     ""
-    const execString = `(${funcMinifyString})(${stringArgs});`
+
+    const execString = `(${funcMinifyString})(${stringArgs})`
     const deferString = `window.addEventListener("load",function(){${execString}});`
 
     return defer ? deferString : execString
@@ -47,7 +96,7 @@ function getClientFunction(name:string):string {
 }
 
 
-function compileAttributes(element: JSX.Element): string {
+function compileAttributes(element: JSX.Element):string {
     function createAttribute(key:string, value:string) {
         return `${key}=${encapsolateString(String(value))}`
     }
@@ -99,7 +148,7 @@ function compileAttributes(element: JSX.Element): string {
 
 
 
-function compileChildren(element: JSX.Element): string {
+function compileChildren(element: JSX.Element):string {
     if (element.children == undefined) return ""
     
     var childrenArray:string[] = []
@@ -137,7 +186,7 @@ export function appendScriptBundel(script:string) {
 }
 
 
-export function compile(element: JSX.Element): string {
+export function compile(element: JSX.Element):string {
     var contentString:string = compileChildren(element)
     var attributesString:string = compileAttributes(element)
 
@@ -146,7 +195,7 @@ export function compile(element: JSX.Element): string {
 
 export function construct(options: Compiler.ConstructionOptions) {
     bundel = defaultBundel
-
+    createInitialBundle()
 
     const dirPath = resolve(__dirname, options.outDir)
     const fullPath = join(dirPath, "index.html")
@@ -177,3 +226,7 @@ export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Functio
     }
 }
 
+
+
+// Helper functions for typescript !NOT VERY CLEAN!
+export function registerClient(variabels:{[key: string]: any}) {}

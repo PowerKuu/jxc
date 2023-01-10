@@ -1,30 +1,63 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.factory = exports.construct = exports.compile = exports.appendScriptBundel = exports.appendStyleBundel = void 0;
+exports.registerClient = exports.factory = exports.construct = exports.compile = exports.appendScriptBundel = exports.appendStyleBundel = void 0;
 const uglify_js_1 = require("uglify-js");
 const path_1 = require("path");
 const fs_1 = require("fs");
 const crypto = require("crypto");
+const CleanCss = require('clean-css');
+const cleanCss = new CleanCss();
 const defaultBundel = {
     script: "",
     style: ""
 };
 var bundel = defaultBundel;
+function minifyJavascript(str, trailingSemicolon) {
+    const minified = (0, uglify_js_1.minify)(str, {
+        "compress": false,
+    });
+    if (minified.error)
+        return;
+    // Remove trailing ssemicolon
+    var code = minified.code;
+    if (trailingSemicolon) {
+        code = !minified.code.endsWith(";") ? `${code};` : code;
+    }
+    else {
+        code = minified.code.endsWith(";") ? minified.code.slice(0, -1) : code;
+    }
+    return code;
+}
+function minifyCss(str) {
+    const minifed = cleanCss.minify(str);
+    if (minifed.errors.length > 0) {
+        throw new Error(minifed.errors.join("\n"));
+    }
+    if (minifed.warnings.length > 0) {
+        console.warn("Css warnings:", minifed.warnings.join("\n"));
+    }
+    return minifed.styles ?? "";
+}
+function createInitialBundle() {
+    const scriptBundelPath = (0, path_1.join)(__dirname, "bundel", "js.js");
+    const cssBundelPath = (0, path_1.join)(__dirname, "bundel", "css.css");
+    defaultBundel.script += minifyJavascript((0, fs_1.readFileSync)(scriptBundelPath, {
+        "encoding": "utf-8"
+    }), true);
+    defaultBundel.style += minifyCss((0, fs_1.readFileSync)(cssBundelPath, {
+        "encoding": "utf-8"
+    }));
+}
 function stringifyFunction(func, args = [], defer = false) {
     function proccessArgs(args) {
         return JSON.stringify(args).slice(1, -1);
     }
     const funcString = func.toString();
-    const funcMinify = (0, uglify_js_1.minify)(funcString, {
-        "compress": false,
-    });
-    const funcMinifyString = funcMinify.error ?
-        funcString :
-        funcMinify.code.slice(0, -1);
+    const funcMinifyString = minifyJavascript(funcString, false) ?? funcString;
     const stringArgs = args ?
         proccessArgs(args) :
         "";
-    const execString = `(${funcMinifyString})(${stringArgs});`;
+    const execString = `(${funcMinifyString})(${stringArgs})`;
     const deferString = `window.addEventListener("load",function(){${execString}});`;
     return defer ? deferString : execString;
 }
@@ -105,6 +138,7 @@ function compile(element) {
 exports.compile = compile;
 function construct(options) {
     bundel = defaultBundel;
+    createInitialBundle();
     const dirPath = (0, path_1.resolve)(__dirname, options.outDir);
     const fullPath = (0, path_1.join)(dirPath, "index.html");
     (0, fs_1.mkdirSync)(dirPath, { recursive: true });
@@ -130,3 +164,6 @@ function factory(tag, attributes, ...children) {
     };
 }
 exports.factory = factory;
+// Helper functions for typescript !NOT VERY CLEAN!
+function registerClient(variabels) { }
+exports.registerClient = registerClient;
