@@ -37,7 +37,7 @@ function stringifyFunction(func: Function, args:any[] = [], defer = false) {
 function registerClientFunction(stringifiedFunction:string):string {
     const randomUUID = crypto.randomUUID()
 
-    bundel.script += `window["${randomUUID}"]=function(){${stringifiedFunction}}`
+    bundel.script += `window["${randomUUID}"]=function(){${stringifiedFunction}};`
 
     return randomUUID
 }
