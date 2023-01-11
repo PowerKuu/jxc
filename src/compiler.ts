@@ -69,7 +69,7 @@ function compileAttributes(element: JSX.Element):string {
         return `${key}=${encapsolateString(String(value))}`
     }
     
-    const excludeList = ["args", "id"]
+    const excludeList = ["id"]
     
     function encapsolateString(str:string) {
         str = str.split("").map((value) => {
@@ -127,7 +127,7 @@ function compileChildren(element: JSX.Element):string {
         else if (element.tag == "script" && typeof child == "function") {
             const execString = createClientFunctionString(
                 child, 
-                element.attributes.args,
+                [],
                 element.attributes.defer
             )
 
@@ -187,9 +187,8 @@ export function appendStyleBundel(style:string) {
     bundel.style += style
 }
 
-export function appendScriptBundel(script:string, autoSemicolon:boolean = true) {
-    if (autoSemicolon) bundel.script += trailingSemicolon(script, true)
-    else bundel.script += script
+export function appendScriptBundel(script:string, semicolon:boolean = true) {
+    bundel.script += trailingSemicolon(script, semicolon)
 }
 
 

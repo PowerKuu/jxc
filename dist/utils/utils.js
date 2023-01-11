@@ -6,10 +6,10 @@ const CleanCss = require('clean-css');
 const cleanCss = new CleanCss();
 function trailingSemicolon(target, semicolon) {
     if (semicolon) {
-        return !target.endsWith(";") ? `${target};` : target;
+        return (target.endsWith(";") ? target : `${target};`);
     }
     else {
-        return target.endsWith(";") ? target.slice(0, -1) : target;
+        return (target.endsWith(";") ? target.slice(0, -1) : target);
     }
 }
 exports.trailingSemicolon = trailingSemicolon;
@@ -38,6 +38,9 @@ function stringifyValue(value) {
     const stringifyTypes = ["string", "number", "object", "boolean", "bigint", "symbol"];
     const stringTypes = ["function"];
     if (typeof value == "object") {
+        // Classes
+        if (value.__proto__ && !Array.isArray(value))
+            return stringifyObject({ ...value, ...value.__proto__ });
         return stringifyObject(value);
     }
     if (stringifyTypes.includes(typeof value)) {

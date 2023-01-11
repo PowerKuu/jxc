@@ -42,6 +42,8 @@ export function stringifyValue(value:any) {
     const stringTypes = ["function"]
 
     if (typeof value == "object") {
+        // Classes
+        if (value.__proto__ && !Array.isArray(value)) return stringifyObject({...value, ...value.__proto__})
         return stringifyObject(value)
     } 
     

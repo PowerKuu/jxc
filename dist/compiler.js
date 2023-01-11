@@ -49,7 +49,7 @@ function compileAttributes(element) {
     function createAttribute(key, value) {
         return `${key}=${encapsolateString(String(value))}`;
     }
-    const excludeList = ["args", "id"];
+    const excludeList = ["id"];
     function encapsolateString(str) {
         str = str.split("").map((value) => {
             if (value == `"`)
@@ -87,7 +87,7 @@ function compileChildren(element) {
             continue;
         }
         else if (element.tag == "script" && typeof child == "function") {
-            const execString = createClientFunctionString(child, element.attributes.args, element.attributes.defer);
+            const execString = createClientFunctionString(child, [], element.attributes.defer);
             childrenArray.push(execString);
             continue;
         }
@@ -135,11 +135,8 @@ function appendStyleBundel(style) {
     bundel.style += style;
 }
 exports.appendStyleBundel = appendStyleBundel;
-function appendScriptBundel(script, autoSemicolon = true) {
-    if (autoSemicolon)
-        bundel.script += (0, utils_1.trailingSemicolon)(script, true);
-    else
-        bundel.script += script;
+function appendScriptBundel(script, semicolon = true) {
+    bundel.script += (0, utils_1.trailingSemicolon)(script, semicolon);
 }
 exports.appendScriptBundel = appendScriptBundel;
 // Helper functions
