@@ -25,7 +25,7 @@ function createInitialBundle():Compiler.Bundel {
 
 
 
-function createClientFunctionString(func: Function, args:any[] = [], defer = false) {
+function createClientFunctionString(func: Function, defer = false, args:any[] = []) {
     function proccessArgs(args:any[]){
         return stringifyValue(args).slice(1, -1)
     }
@@ -33,9 +33,7 @@ function createClientFunctionString(func: Function, args:any[] = [], defer = fal
     const funcString = func.toString()
     const funcMinifyString = minifyJavascript(funcString, false) ?? funcString
     
-    const stringArgs = args ? 
-    proccessArgs(args) : 
-    ""
+    const stringArgs = args.length > 0 ? proccessArgs(args) : ""
 
     const execString = `(${funcMinifyString})(${stringArgs})`
     const deferString = `window.addEventListener("load",function(){${execString}});`
@@ -87,7 +85,7 @@ function compileAttributes(element: JSX.Element):string {
     for (var [key, value] of  Object.entries(element.attributes)) {
         if (typeof value == "function") {
             const funcName = registerClientFunction(
-                createClientFunctionString(value, [element])
+                createClientFunctionString(value, false, [element])
             )
 
             attributesArray.push(
@@ -127,7 +125,6 @@ function compileChildren(element: JSX.Element):string {
         else if (element.tag == "script" && typeof child == "function") {
             const execString = createClientFunctionString(
                 child, 
-                [],
                 element.attributes.defer
             )
 

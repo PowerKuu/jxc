@@ -18,15 +18,13 @@ function createInitialBundle() {
     }));
     return { script, style };
 }
-function createClientFunctionString(func, args = [], defer = false) {
+function createClientFunctionString(func, defer = false, args = []) {
     function proccessArgs(args) {
         return (0, utils_1.stringifyValue)(args).slice(1, -1);
     }
     const funcString = func.toString();
     const funcMinifyString = (0, utils_1.minifyJavascript)(funcString, false) ?? funcString;
-    const stringArgs = args ?
-        proccessArgs(args) :
-        "";
+    const stringArgs = args.length > 0 ? proccessArgs(args) : "";
     const execString = `(${funcMinifyString})(${stringArgs})`;
     const deferString = `window.addEventListener("load",function(){${execString}});`;
     return defer ? deferString : execString;
@@ -63,7 +61,7 @@ function compileAttributes(element) {
     var attributesArray = [];
     for (var [key, value] of Object.entries(element.attributes)) {
         if (typeof value == "function") {
-            const funcName = registerClientFunction(createClientFunctionString(value, [element]));
+            const funcName = registerClientFunction(createClientFunctionString(value, false, [element]));
             attributesArray.push(createAttribute(key, getClientFunction(funcName)));
             continue;
         }
@@ -87,7 +85,7 @@ function compileChildren(element) {
             continue;
         }
         else if (element.tag == "script" && typeof child == "function") {
-            const execString = createClientFunctionString(child, [], element.attributes.defer);
+            const execString = createClientFunctionString(child, element.attributes.defer);
             childrenArray.push(execString);
             continue;
         }

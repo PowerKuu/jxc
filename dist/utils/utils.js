@@ -19,7 +19,7 @@ function minifyJavascript(str, semicolon) {
     });
     if (minified.error)
         return;
-    // Remove trailing ssemicolon}
+    // Remove trailing semicolon
     return trailingSemicolon(minified.code, semicolon);
 }
 exports.minifyJavascript = minifyJavascript;
@@ -39,8 +39,11 @@ function stringifyValue(value) {
     const stringTypes = ["function"];
     if (typeof value == "object") {
         // Classes
-        if (value.__proto__ && !Array.isArray(value))
-            return stringifyObject({ ...value, ...value.__proto__ });
+        if (typeof value.constructor == "function" && Object.getPrototypeOf(value)) {
+            // Future create do allot of stuff for class to work
+            return stringifyObject(value);
+            //value.constructor.toString()
+        }
         return stringifyObject(value);
     }
     if (stringifyTypes.includes(typeof value)) {
