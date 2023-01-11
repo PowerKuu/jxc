@@ -17,6 +17,7 @@
     "postcss": "^8.4.21",
     "postcss-modules": "^6.0.0",
     "require-resolve": "^0.0.2",
+    "stringify-object": "^4.0.1",
     "synckit": "^0.8.4",
     "typescript": "^4.9.4",
     "uglify-js": "^3.17.4"
@@ -24,11 +25,12 @@
   "devDependencies": {
     "@types/babel__core": "^7.1.20",
     "@types/node": "^18.11.18",
+    "@types/stringify-object": "^4.0.2",
     "@types/uglify-js": "^3.17.1",
     "copyfiles": "^2.4.1"
   },
   "name": "@klevn/jxc",
-  "version": "24.0.5",
+  "version": "28.0.8",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": "./dist/cli/barrel.js",

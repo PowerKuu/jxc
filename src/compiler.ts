@@ -1,13 +1,9 @@
-import { minify as minifyJavascriptUnsafe } from "uglify-js"
-
 import { join, resolve } from "path"
 import { mkdirSync, readFileSync, writeFileSync } from "fs"
 
 import * as crypto from "crypto"
 
-
-const CleanCss = require('clean-css')
-const cleanCss = new CleanCss()
+import { minifyCss, minifyJavascript, stringifyValue } from "./utils/utils"
 
 const defaultBundel = {
     script: "",
@@ -16,58 +12,24 @@ const defaultBundel = {
 
 var bundel = defaultBundel
 
-
-function minifyJavascript(str:string, trailingSemicolon:boolean):string {
-    const minified = minifyJavascriptUnsafe(str, {
-        "compress": false,
-    })
-    
-    if (minified.error) return
-
-    // Remove trailing ssemicolon
-    var code = minified.code
-
-    if (trailingSemicolon) {
-        code = !minified.code.endsWith(";") ? `${code};` : code
-    } else {
-        code = minified.code.endsWith(";") ? minified.code.slice(0,-1) : code
-    }
-    
-    return code
-}
-
-function minifyCss(str:string):string {
-    const minifed = cleanCss.minify(str)
-
-    if(minifed.errors.length > 0){
-        throw new Error(minifed.errors.join("\n"))
-    }
-    if(minifed.warnings.length > 0){
-        console.warn("Css warnings:", minifed.warnings.join("\n"))
-    }
-
-    return minifed.styles ?? ""
-}
-
-
 function createInitialBundle() {
     const scriptBundelPath = join(__dirname, "bundel", "js.js")
     const cssBundelPath = join(__dirname, "bundel", "css.css")
     
-    defaultBundel.script += minifyJavascript(readFileSync(scriptBundelPath,  {
+    appendScriptBundel(minifyJavascript(readFileSync(scriptBundelPath,  {
         "encoding": "utf-8"
-    }), true)
+    }), true), false)
 
-    defaultBundel.style += minifyCss(readFileSync(cssBundelPath,  {
+    appendStyleBundel(minifyCss(readFileSync(cssBundelPath,  {
         "encoding": "utf-8"
-    }))
+    })))
 }
 
 
 
-function stringifyFunction(func: Function, args:any[] = [], defer = false) {
+function createStringFunction(func: Function, args:any[] = [], defer = false) {
     function proccessArgs(args:any[]){
-        return JSON.stringify(args).slice(1, -1)
+        return stringifyValue(args).slice(1, -1)
     }
 
     const funcString = func.toString()
@@ -83,16 +45,24 @@ function stringifyFunction(func: Function, args:any[] = [], defer = false) {
     return defer ? deferString : execString
 }
 
-function registerClientFunction(stringifiedFunction:string):string {
-    const randomUUID = crypto.randomUUID()
-
-    bundel.script += `window["${randomUUID}"]=function(){${stringifiedFunction}};`
-
-    return randomUUID
+function getClientVariabel(name:string):string {
+    return `window["${name}"]`
 }
 
 function getClientFunction(name:string):string {
-    return `window["${name}"]();`
+    return `${getClientVariabel(name)}();`
+}
+
+function registerClientVariabel(name:string, value:string) {
+    appendScriptBundel(`${getClientVariabel(name)}=${value}`)
+}
+
+function registerClientFunction(stringifiedFunction:string, id:string = undefined):string {
+    const ID = !!id ? id : crypto.randomUUID()
+
+    registerClientVariabel(ID, `function(){${stringifiedFunction}}`)
+
+    return ID
 }
 
 
@@ -119,7 +89,7 @@ function compileAttributes(element: JSX.Element):string {
     for (var [key, value] of  Object.entries(element.attributes)) {
         if (typeof value == "function") {
             const funcName = registerClientFunction(
-                stringifyFunction(value, [element])
+                createStringFunction(value, [element])
             )
 
             attributesArray.push(
@@ -159,7 +129,7 @@ function compileChildren(element: JSX.Element):string {
             continue
         } 
         else if (element.tag == "script" && typeof child == "function") {
-            const execString = stringifyFunction(
+            const execString = createStringFunction(
                 child, 
                 element.attributes.args,
                 element.attributes.defer
@@ -176,15 +146,6 @@ function compileChildren(element: JSX.Element):string {
 
     return childrenArray.join("").trim()
 }
-
-export function appendStyleBundel(style:string) {
-    bundel.style += style
-}
-
-export function appendScriptBundel(script:string) {
-    bundel.script += script
-}
-
 
 export function compile(element: JSX.Element):string {
     var contentString:string = compileChildren(element)
@@ -226,7 +187,19 @@ export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Functio
     }
 }
 
+export function appendStyleBundel(style:string) {
+    bundel.style += style
+}
+
+export function appendScriptBundel(script:string, autoSemicolon:boolean = true) {
+    if (autoSemicolon) bundel.script += script.endsWith(";") ? script : `${script};`
+    else bundel.script += script
+}
 
 
-// Helper functions for typescript !NOT VERY CLEAN!
-export function registerClient(variabels:{[key: string]: any}) {}
+// Helper functions
+export function useClient(values: {[key: string]: unknown}) {    
+    for (var [key, value] of Object.entries(values)) {   
+        registerClientVariabel(key, stringifyValue(value))
+    }
+}

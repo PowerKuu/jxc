@@ -1,59 +1,31 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.registerClient = exports.factory = exports.construct = exports.compile = exports.appendScriptBundel = exports.appendStyleBundel = void 0;
-const uglify_js_1 = require("uglify-js");
+exports.useClient = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
 const path_1 = require("path");
 const fs_1 = require("fs");
 const crypto = require("crypto");
-const CleanCss = require('clean-css');
-const cleanCss = new CleanCss();
+const utils_1 = require("./utils/utils");
 const defaultBundel = {
     script: "",
     style: ""
 };
 var bundel = defaultBundel;
-function minifyJavascript(str, trailingSemicolon) {
-    const minified = (0, uglify_js_1.minify)(str, {
-        "compress": false,
-    });
-    if (minified.error)
-        return;
-    // Remove trailing ssemicolon
-    var code = minified.code;
-    if (trailingSemicolon) {
-        code = !minified.code.endsWith(";") ? `${code};` : code;
-    }
-    else {
-        code = minified.code.endsWith(";") ? minified.code.slice(0, -1) : code;
-    }
-    return code;
-}
-function minifyCss(str) {
-    const minifed = cleanCss.minify(str);
-    if (minifed.errors.length > 0) {
-        throw new Error(minifed.errors.join("\n"));
-    }
-    if (minifed.warnings.length > 0) {
-        console.warn("Css warnings:", minifed.warnings.join("\n"));
-    }
-    return minifed.styles ?? "";
-}
 function createInitialBundle() {
     const scriptBundelPath = (0, path_1.join)(__dirname, "bundel", "js.js");
     const cssBundelPath = (0, path_1.join)(__dirname, "bundel", "css.css");
-    defaultBundel.script += minifyJavascript((0, fs_1.readFileSync)(scriptBundelPath, {
+    appendScriptBundel((0, utils_1.minifyJavascript)((0, fs_1.readFileSync)(scriptBundelPath, {
         "encoding": "utf-8"
-    }), true);
-    defaultBundel.style += minifyCss((0, fs_1.readFileSync)(cssBundelPath, {
+    }), true), false);
+    appendStyleBundel((0, utils_1.minifyCss)((0, fs_1.readFileSync)(cssBundelPath, {
         "encoding": "utf-8"
-    }));
+    })));
 }
-function stringifyFunction(func, args = [], defer = false) {
+function createStringFunction(func, args = [], defer = false) {
     function proccessArgs(args) {
-        return JSON.stringify(args).slice(1, -1);
+        return (0, utils_1.stringifyValue)(args).slice(1, -1);
     }
     const funcString = func.toString();
-    const funcMinifyString = minifyJavascript(funcString, false) ?? funcString;
+    const funcMinifyString = (0, utils_1.minifyJavascript)(funcString, false) ?? funcString;
     const stringArgs = args ?
         proccessArgs(args) :
         "";
@@ -61,13 +33,19 @@ function stringifyFunction(func, args = [], defer = false) {
     const deferString = `window.addEventListener("load",function(){${execString}});`;
     return defer ? deferString : execString;
 }
-function registerClientFunction(stringifiedFunction) {
-    const randomUUID = crypto.randomUUID();
-    bundel.script += `window["${randomUUID}"]=function(){${stringifiedFunction}};`;
-    return randomUUID;
+function getClientVariabel(name) {
+    return `window["${name}"]`;
 }
 function getClientFunction(name) {
-    return `window["${name}"]();`;
+    return `${getClientVariabel(name)}();`;
+}
+function registerClientVariabel(name, value) {
+    appendScriptBundel(`${getClientVariabel(name)}=${value}`);
+}
+function registerClientFunction(stringifiedFunction, id = undefined) {
+    const ID = !!id ? id : crypto.randomUUID();
+    registerClientVariabel(ID, `function(){${stringifiedFunction}}`);
+    return ID;
 }
 function compileAttributes(element) {
     function createAttribute(key, value) {
@@ -87,7 +65,7 @@ function compileAttributes(element) {
     var attributesArray = [];
     for (var [key, value] of Object.entries(element.attributes)) {
         if (typeof value == "function") {
-            const funcName = registerClientFunction(stringifyFunction(value, [element]));
+            const funcName = registerClientFunction(createStringFunction(value, [element]));
             attributesArray.push(createAttribute(key, getClientFunction(funcName)));
             continue;
         }
@@ -111,7 +89,7 @@ function compileChildren(element) {
             continue;
         }
         else if (element.tag == "script" && typeof child == "function") {
-            const execString = stringifyFunction(child, element.attributes.args, element.attributes.defer);
+            const execString = createStringFunction(child, element.attributes.args, element.attributes.defer);
             childrenArray.push(execString);
             continue;
         }
@@ -122,14 +100,6 @@ function compileChildren(element) {
     }
     return childrenArray.join("").trim();
 }
-function appendStyleBundel(style) {
-    bundel.style += style;
-}
-exports.appendStyleBundel = appendStyleBundel;
-function appendScriptBundel(script) {
-    bundel.script += script;
-}
-exports.appendScriptBundel = appendScriptBundel;
 function compile(element) {
     var contentString = compileChildren(element);
     var attributesString = compileAttributes(element);
@@ -164,6 +134,21 @@ function factory(tag, attributes, ...children) {
     };
 }
 exports.factory = factory;
-// Helper functions for typescript !NOT VERY CLEAN!
-function registerClient(variabels) { }
-exports.registerClient = registerClient;
+function appendStyleBundel(style) {
+    bundel.style += style;
+}
+exports.appendStyleBundel = appendStyleBundel;
+function appendScriptBundel(script, autoSemicolon = true) {
+    if (autoSemicolon)
+        bundel.script += script.endsWith(";") ? script : `${script};`;
+    else
+        bundel.script += script;
+}
+exports.appendScriptBundel = appendScriptBundel;
+// Helper functions
+function useClient(values) {
+    for (var [key, value] of Object.entries(values)) {
+        registerClientVariabel(key, (0, utils_1.stringifyValue)(value));
+    }
+}
+exports.useClient = useClient;
