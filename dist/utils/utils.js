@@ -1,24 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stringifyValue = exports.minifyCss = exports.minifyJavascript = void 0;
+exports.stringifyValue = exports.minifyCss = exports.minifyJavascript = exports.trailingSemicolon = void 0;
 const uglify_js_1 = require("uglify-js");
 const CleanCss = require('clean-css');
 const cleanCss = new CleanCss();
-function minifyJavascript(str, trailingSemicolon) {
+function trailingSemicolon(target, semicolon) {
+    if (semicolon) {
+        return !target.endsWith(";") ? `${target};` : target;
+    }
+    else {
+        return target.endsWith(";") ? target.slice(0, -1) : target;
+    }
+}
+exports.trailingSemicolon = trailingSemicolon;
+function minifyJavascript(str, semicolon) {
     const minified = (0, uglify_js_1.minify)(str, {
         "compress": false,
     });
     if (minified.error)
         return;
-    // Remove trailing ssemicolon
-    var code = minified.code;
-    if (trailingSemicolon) {
-        code = !minified.code.endsWith(";") ? `${code};` : code;
-    }
-    else {
-        code = minified.code.endsWith(";") ? minified.code.slice(0, -1) : code;
-    }
-    return code;
+    // Remove trailing ssemicolon}
+    return trailingSemicolon(minified.code, semicolon);
 }
 exports.minifyJavascript = minifyJavascript;
 function minifyCss(str) {
@@ -33,7 +35,7 @@ function minifyCss(str) {
 }
 exports.minifyCss = minifyCss;
 function stringifyValue(value) {
-    const stringifyTypes = ["string", "number", "object", "boolean"];
+    const stringifyTypes = ["string", "number", "object", "boolean", "bigint", "symbol"];
     const stringTypes = ["function"];
     if (typeof value == "object") {
         return stringifyObject(value);
@@ -47,6 +49,7 @@ function stringifyValue(value) {
         }
         return String(value);
     }
+    return "undefined";
 }
 exports.stringifyValue = stringifyValue;
 function stringifyObject(object) {

@@ -1,12 +1,8 @@
-function registerClient(variabels) {
-    for (var [key, value] of Object.entries(variabels)) {
-        window[key] = value
-    }
+function id(id) {
+    return document.getElementById(id)
 }
-
-
 
 // Make sure import is correct
 window["_jxc"] = {
-    registerClient
+    id
 }

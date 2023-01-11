@@ -6,4 +6,5 @@ export declare function appendScriptBundel(script: string, autoSemicolon?: boole
 export declare function useClient(values: {
     [key: string]: unknown;
 }): void;
+export declare function id(id: string): HTMLElement;
 //# sourceMappingURL=compiler.d.ts.map

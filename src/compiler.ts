@@ -3,31 +3,29 @@ import { mkdirSync, readFileSync, writeFileSync } from "fs"
 
 import * as crypto from "crypto"
 
-import { minifyCss, minifyJavascript, stringifyValue } from "./utils/utils"
+import { minifyCss, minifyJavascript, stringifyValue, trailingSemicolon } from "./utils/utils"
 
-const defaultBundel = {
-    script: "",
-    style: ""
-}
-
+var defaultBundel:Compiler.Bundel = createInitialBundle()
 var bundel = defaultBundel
 
-function createInitialBundle() {
+function createInitialBundle():Compiler.Bundel {
     const scriptBundelPath = join(__dirname, "bundel", "js.js")
     const cssBundelPath = join(__dirname, "bundel", "css.css")
     
-    appendScriptBundel(minifyJavascript(readFileSync(scriptBundelPath,  {
+    const script = minifyJavascript(readFileSync(scriptBundelPath,  {
         "encoding": "utf-8"
-    }), true), false)
+    }), true)
 
-    appendStyleBundel(minifyCss(readFileSync(cssBundelPath,  {
+    const style = minifyCss(readFileSync(cssBundelPath,  {
         "encoding": "utf-8"
-    })))
+    }))
+
+    return {script, style}
 }
 
 
 
-function createStringFunction(func: Function, args:any[] = [], defer = false) {
+function createClientFunctionString(func: Function, args:any[] = [], defer = false) {
     function proccessArgs(args:any[]){
         return stringifyValue(args).slice(1, -1)
     }
@@ -89,7 +87,7 @@ function compileAttributes(element: JSX.Element):string {
     for (var [key, value] of  Object.entries(element.attributes)) {
         if (typeof value == "function") {
             const funcName = registerClientFunction(
-                createStringFunction(value, [element])
+                createClientFunctionString(value, [element])
             )
 
             attributesArray.push(
@@ -116,8 +114,6 @@ function compileAttributes(element: JSX.Element):string {
     return attributesArray.join("").trim()
 }
 
-
-
 function compileChildren(element: JSX.Element):string {
     if (element.children == undefined) return ""
     
@@ -129,7 +125,7 @@ function compileChildren(element: JSX.Element):string {
             continue
         } 
         else if (element.tag == "script" && typeof child == "function") {
-            const execString = createStringFunction(
+            const execString = createClientFunctionString(
                 child, 
                 element.attributes.args,
                 element.attributes.defer
@@ -156,20 +152,20 @@ export function compile(element: JSX.Element):string {
 
 export function construct(options: Compiler.ConstructionOptions) {
     bundel = defaultBundel
-    createInitialBundle()
+
+    const compiled = compile(options.element)
 
     const dirPath = resolve(__dirname, options.outDir)
     const fullPath = join(dirPath, "index.html")
 
     mkdirSync(dirPath, {recursive: true})
-    const compiled = compile(options.element)
 
     writeFileSync(fullPath, [
         "<!DOCTYPE html>",
         `<script>${bundel.script}</script>`,
         `<style>${bundel.style}</style>`,
         compiled
-    ].join("\n"))
+    ].join(""))
 }
 
 export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Function, attributes:JSX.Attributes|null, ...children: JSX.Children[]):JSX.Element {
@@ -192,7 +188,7 @@ export function appendStyleBundel(style:string) {
 }
 
 export function appendScriptBundel(script:string, autoSemicolon:boolean = true) {
-    if (autoSemicolon) bundel.script += script.endsWith(";") ? script : `${script};`
+    if (autoSemicolon) bundel.script += trailingSemicolon(script, true)
     else bundel.script += script
 }
 
@@ -202,4 +198,10 @@ export function useClient(values: {[key: string]: unknown}) {
     for (var [key, value] of Object.entries(values)) {   
         registerClientVariabel(key, stringifyValue(value))
     }
+}
+
+
+// Client side
+export function id(id:string): HTMLElement {
+    return 
 }

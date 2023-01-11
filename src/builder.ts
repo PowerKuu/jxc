@@ -116,4 +116,3 @@ export function build(input:string, output:string) {
     transpileRoutes(input)
     evalRoutes(output)
 }
-

@@ -1,26 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useClient = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
+exports.id = exports.useClient = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
 const path_1 = require("path");
 const fs_1 = require("fs");
 const crypto = require("crypto");
 const utils_1 = require("./utils/utils");
-const defaultBundel = {
-    script: "",
-    style: ""
-};
+var defaultBundel = createInitialBundle();
 var bundel = defaultBundel;
 function createInitialBundle() {
     const scriptBundelPath = (0, path_1.join)(__dirname, "bundel", "js.js");
     const cssBundelPath = (0, path_1.join)(__dirname, "bundel", "css.css");
-    appendScriptBundel((0, utils_1.minifyJavascript)((0, fs_1.readFileSync)(scriptBundelPath, {
+    const script = (0, utils_1.minifyJavascript)((0, fs_1.readFileSync)(scriptBundelPath, {
         "encoding": "utf-8"
-    }), true), false);
-    appendStyleBundel((0, utils_1.minifyCss)((0, fs_1.readFileSync)(cssBundelPath, {
+    }), true);
+    const style = (0, utils_1.minifyCss)((0, fs_1.readFileSync)(cssBundelPath, {
         "encoding": "utf-8"
-    })));
+    }));
+    return { script, style };
 }
-function createStringFunction(func, args = [], defer = false) {
+function createClientFunctionString(func, args = [], defer = false) {
     function proccessArgs(args) {
         return (0, utils_1.stringifyValue)(args).slice(1, -1);
     }
@@ -65,7 +63,7 @@ function compileAttributes(element) {
     var attributesArray = [];
     for (var [key, value] of Object.entries(element.attributes)) {
         if (typeof value == "function") {
-            const funcName = registerClientFunction(createStringFunction(value, [element]));
+            const funcName = registerClientFunction(createClientFunctionString(value, [element]));
             attributesArray.push(createAttribute(key, getClientFunction(funcName)));
             continue;
         }
@@ -89,7 +87,7 @@ function compileChildren(element) {
             continue;
         }
         else if (element.tag == "script" && typeof child == "function") {
-            const execString = createStringFunction(child, element.attributes.args, element.attributes.defer);
+            const execString = createClientFunctionString(child, element.attributes.args, element.attributes.defer);
             childrenArray.push(execString);
             continue;
         }
@@ -108,17 +106,16 @@ function compile(element) {
 exports.compile = compile;
 function construct(options) {
     bundel = defaultBundel;
-    createInitialBundle();
+    const compiled = compile(options.element);
     const dirPath = (0, path_1.resolve)(__dirname, options.outDir);
     const fullPath = (0, path_1.join)(dirPath, "index.html");
     (0, fs_1.mkdirSync)(dirPath, { recursive: true });
-    const compiled = compile(options.element);
     (0, fs_1.writeFileSync)(fullPath, [
         "<!DOCTYPE html>",
         `<script>${bundel.script}</script>`,
         `<style>${bundel.style}</style>`,
         compiled
-    ].join("\n"));
+    ].join(""));
 }
 exports.construct = construct;
 function factory(tag, attributes, ...children) {
@@ -140,7 +137,7 @@ function appendStyleBundel(style) {
 exports.appendStyleBundel = appendStyleBundel;
 function appendScriptBundel(script, autoSemicolon = true) {
     if (autoSemicolon)
-        bundel.script += script.endsWith(";") ? script : `${script};`;
+        bundel.script += (0, utils_1.trailingSemicolon)(script, true);
     else
         bundel.script += script;
 }
@@ -152,3 +149,8 @@ function useClient(values) {
     }
 }
 exports.useClient = useClient;
+// Client side
+function id(id) {
+    return;
+}
+exports.id = id;

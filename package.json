@@ -25,12 +25,11 @@
   "devDependencies": {
     "@types/babel__core": "^7.1.20",
     "@types/node": "^18.11.18",
-    "@types/stringify-object": "^4.0.2",
     "@types/uglify-js": "^3.17.1",
     "copyfiles": "^2.4.1"
   },
   "name": "@klevn/jxc",
-  "version": "28.0.8",
+  "version": "30.0.1",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": "./dist/cli/barrel.js",

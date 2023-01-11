@@ -3,23 +3,24 @@ import { minify as minifyJavascriptUnsafe } from "uglify-js"
 const CleanCss = require('clean-css')
 const cleanCss = new CleanCss()
 
-export function minifyJavascript(str:string, trailingSemicolon:boolean):string {
+export function trailingSemicolon(target:string, semicolon:boolean):string {
+    if (semicolon) {
+        return (target.endsWith(";") ? target : `${target};`)
+    } else {
+        return (target.endsWith(";") ? target.slice(0,-1) : target)
+    }
+}
+ 
+export function minifyJavascript(str:string, semicolon:boolean):string {
     const minified = minifyJavascriptUnsafe(str, {
         "compress": false,
     })
     
     if (minified.error) return
 
-    // Remove trailing ssemicolon
-    var code = minified.code
-
-    if (trailingSemicolon) {
-        code = !minified.code.endsWith(";") ? `${code};` : code
-    } else {
-        code = minified.code.endsWith(";") ? minified.code.slice(0,-1) : code
-    }
+    // Remove trailing ssemicolon}
     
-    return code
+    return trailingSemicolon(minified.code, semicolon)
 }
 
 export function minifyCss(str:string):string {
@@ -37,7 +38,7 @@ export function minifyCss(str:string):string {
 
 
 export function stringifyValue(value:any) {
-    const stringifyTypes = ["string", "number", "object", "boolean"]
+    const stringifyTypes = ["string", "number", "object", "boolean", "bigint", "symbol"]
     const stringTypes = ["function"]
 
     if (typeof value == "object") {
@@ -55,6 +56,8 @@ export function stringifyValue(value:any) {
 
         return String(value)
     }
+
+    return "undefined"
 }
 
 function stringifyObject(object:Object):string {
