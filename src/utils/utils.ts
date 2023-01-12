@@ -77,7 +77,7 @@ function stringifyObject(object:Object):string {
     function appendProperty(key:string, value:string) {
         const doTrailingComma = index == Object.entries(object).length
         var trailingComma = doTrailingComma ? "" : ","
-        str += [key, ":", value, trailingComma].join("")
+        str += [JSON.stringify(key), ":", value, trailingComma].join("")
     }
 
     function appendArray(value:string) {

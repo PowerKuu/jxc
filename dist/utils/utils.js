@@ -64,7 +64,7 @@ function stringifyObject(object) {
     function appendProperty(key, value) {
         const doTrailingComma = index == Object.entries(object).length;
         var trailingComma = doTrailingComma ? "" : ",";
-        str += [key, ":", value, trailingComma].join("");
+        str += [JSON.stringify(key), ":", value, trailingComma].join("");
     }
     function appendArray(value) {
         if (!Array.isArray(object))
