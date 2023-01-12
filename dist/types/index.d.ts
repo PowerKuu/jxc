@@ -3,4 +3,9 @@ declare namespace Compiler {
         outDir: string,
         element: JSX.Element
     }    
+
+    interface Bundel {
+        script: string
+        style: string
+    }
 }

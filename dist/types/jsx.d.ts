@@ -204,7 +204,6 @@ declare namespace JSX {
   type EventHandler<T> = (element:Element) => any
 
   interface Attributes {
-      args?: unknown[]
       class?: string|string[]
       style?: string|CSSProperties
 

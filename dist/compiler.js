@@ -68,7 +68,7 @@ function compileAttributes(element) {
         if (excludeList.includes(key))
             continue;
         if (key === "style" && typeof value !== "string")
-            value = Object.entries(value).map(([k, v]) => `${k}:${v}`).join(';');
+            value = Object.entries(value).map(([k, v]) => `"${k}":${v}`).join(';');
         if (Array.isArray(value))
             value = value.join(" ");
         attributesArray.push(createAttribute(key, value));
