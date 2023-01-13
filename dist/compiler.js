@@ -24,7 +24,7 @@ function createClientFunctionString(func, id, defer = false, args = []) {
     }
     const funcString = func.toString();
     const funcMinifyString = (0, utils_1.minifyJavascript)(funcString, false) ?? funcString;
-    const funcMinfiyFixedString = funcMinifyString.replaceAll(/\(0,_jxc\.getScope\)\(([^)]*)\)/gm, `(0,_jxc.getClient)("$1")`);
+    const funcMinfiyFixedString = funcMinifyString.replaceAll(/\(0,_jxc\.getScope\)\(([^)]*)\)/gm, `(0,_jxc.getScope)("$1")`);
     const stringArgs = args.length > 0 ? proccessArgs(args) : "";
     const getClientString = "const _jxc={getScope:function(name){return getClientScopedById(name,__id)}}";
     const execString = `(function(__id){${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${(0, utils_1.stringifyValue)(id)})`;
