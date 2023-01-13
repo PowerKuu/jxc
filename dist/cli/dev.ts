@@ -1,18 +1,13 @@
-
-/*
-import { join, resolve } from "path"
+import { resolve } from "path"
 import { argv, cwd } from "process"
 import { build } from "../builder"
-
-//import watch from "node-watch"
-import * as liveServer from "@compodoc/live-server"
 import { watch } from "fs"
 
 export default () => {
     const input = resolve(cwd(), argv[3] ?? "./routes")
-    const output = argv[4] ? resolve(cwd(), argv[4]) : join(__dirname, ".dist")
+    const output = resolve(cwd(), argv[4] ?? "./dist")
 
-    console.log(`Starting dev server input: ${input}, output: ${output}.`)
+    console.log(`Starting dev input: ${input}, output: ${output}.`)
 
     build(input, output)
 
@@ -27,11 +22,6 @@ export default () => {
         build(input, output)
     })
 
-    liveServer.start({
-        root: output
-    })
-
     console.log(`Edit ${input} for live updates.`)
 }
 
-*/

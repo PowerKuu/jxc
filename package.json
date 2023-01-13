@@ -29,7 +29,7 @@
     "copyfiles": "^2.4.1"
   },
   "name": "@klevn/jxc",
-  "version": "31.0.6",
+  "version": "31.6.9",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": "./dist/cli/barrel.js",

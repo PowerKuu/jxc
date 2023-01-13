@@ -5,6 +5,7 @@ export declare function appendStyleBundel(style: string): void;
 export declare function appendScriptBundel(script: string, semicolon?: boolean): void;
 export declare function useClient(values: {
     [key: string]: unknown;
-}): void;
+}): string;
+export declare function getClient<V extends any>(value: V): V;
 export declare function id(id: string): HTMLElement;
 //# sourceMappingURL=compiler.d.ts.map

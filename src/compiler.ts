@@ -23,19 +23,22 @@ function createInitialBundle():Compiler.Bundel {
     return {script, style}
 }
 
-
-
-function createClientFunctionString(func: Function, defer = false, args:any[] = []) {
+function createClientFunctionString(func: Function, id: string, defer = false, args:any[] = []) {
     function proccessArgs(args:any[]){
         return stringifyValue(args).slice(1, -1)
     }
 
     const funcString = func.toString()
     const funcMinifyString = minifyJavascript(funcString, false) ?? funcString
-    
+
+    const funcMinfiyFixedString = funcMinifyString.replaceAll(/\(0,_jxc\.getClient\)\(([^)]*)\)/gm, `(0,_jxc.getClient)("$1")`)
+
     const stringArgs = args.length > 0 ? proccessArgs(args) : ""
 
-    const execString = `(${funcMinifyString})(${stringArgs})`
+    const getClientString = "const _jxc = {getClient: function (name){return getClientScopedById(name, __id)}}"
+    const execString = `(function (__id) {${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${stringifyValue(id)})`
+    
+   
     const deferString = `window.addEventListener("load",function(){${execString}});`
 
     return defer ? deferString : execString
@@ -85,7 +88,7 @@ function compileAttributes(element: JSX.Element):string {
     for (var [key, value] of  Object.entries(element.attributes)) {
         if (typeof value == "function") {
             const funcName = registerClientFunction(
-                createClientFunctionString(value, false, [element])
+                createClientFunctionString(value, element.id, false, [element])
             )
 
             attributesArray.push(
@@ -100,10 +103,10 @@ function compileAttributes(element: JSX.Element):string {
         
         if (excludeList.includes(key)) continue
 
-        
+
         if (key === "style" && typeof value !== "string") value = Object.entries(
             value
-        ).map(([k, v]) => `"${k}":${v}`).join(';')
+        ).map(([k, v]) => `${k}:${v}`).join(';')
 
         if (Array.isArray(value)) value = value.join(" ")
         attributesArray.push(createAttribute(key, value))
@@ -125,6 +128,7 @@ function compileChildren(element: JSX.Element):string {
         else if (element.tag == "script" && typeof child == "function") {
             const execString = createClientFunctionString(
                 child, 
+                element.id,
                 element.attributes.defer
             )
 
@@ -190,12 +194,23 @@ export function appendScriptBundel(script:string, semicolon:boolean = true) {
 
 
 // Helper functions
-export function useClient(values: {[key: string]: unknown}) {    
-    for (var [key, value] of Object.entries(values)) {   
-        registerClientVariabel(key, stringifyValue(value))
-    }
-}
 
+// Returns uuid function scoped
+export function useClient(values: {[key: string]: unknown}):string {    
+    const UUID = crypto.randomUUID()
+    
+    for (var [key, value] of Object.entries(values)) {   
+        registerClientVariabel([UUID, key].join(":"), stringifyValue(value))
+    }
+
+    return UUID
+}
+ 
+
+// Client side
+export function getClient<V extends any>(value: V):V {
+    return value
+}
 
 // Client side
 export function id(id:string): HTMLElement {
