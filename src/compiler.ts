@@ -219,6 +219,6 @@ export function getScope<V extends any>(value: V):V {
 }
 
 // Client side
-export function id(id:string): HTMLElement {
+export function elementId(id:string): HTMLElement {
     return 
 }

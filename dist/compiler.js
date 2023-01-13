@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.id = exports.getScope = exports.useClient = exports.useClientScope = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
+exports.elementId = exports.getScope = exports.useClient = exports.useClientScope = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
 const path_1 = require("path");
 const fs_1 = require("fs");
 const crypto = require("crypto");
@@ -161,7 +161,7 @@ function getScope(value) {
 }
 exports.getScope = getScope;
 // Client side
-function id(id) {
+function elementId(id) {
     return;
 }
-exports.id = id;
+exports.elementId = elementId;

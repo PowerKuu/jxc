@@ -1,4 +1,4 @@
-function id(id) {
+function elementId(id) {
     return document.getElementById(id)
 }
 
@@ -18,6 +18,6 @@ function getClientScopedById(value, id) {
 
 // Make sure import is correct
 window["_jxc"] = {
-    id,
+    elementId,
     getClientScopedById
 }
