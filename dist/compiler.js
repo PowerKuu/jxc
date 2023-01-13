@@ -26,8 +26,8 @@ function createClientFunctionString(func, id, defer = false, args = []) {
     const funcMinifyString = (0, utils_1.minifyJavascript)(funcString, false) ?? funcString;
     const funcMinfiyFixedString = funcMinifyString.replaceAll(/\(0,_jxc\.getClient\)\(([^)]*)\)/gm, `(0,_jxc.getClient)("$1")`);
     const stringArgs = args.length > 0 ? proccessArgs(args) : "";
-    const getClientString = "const _jxc = {getClient: function (name){return getClientScopedById(name, __id)}}";
-    const execString = `(function (__id) {${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${(0, utils_1.stringifyValue)(id)})`;
+    const getClientString = "const _jxc={getClient:function(name){return getClientScopedById(name,__id)}}";
+    const execString = `(function(__id){${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${(0, utils_1.stringifyValue)(id)})`;
     const deferString = `window.addEventListener("load",function(){${execString}});`;
     return defer ? deferString : execString;
 }

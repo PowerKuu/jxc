@@ -35,8 +35,8 @@ function createClientFunctionString(func: Function, id: string, defer = false, a
 
     const stringArgs = args.length > 0 ? proccessArgs(args) : ""
 
-    const getClientString = "const _jxc = {getClient: function (name){return getClientScopedById(name, __id)}}"
-    const execString = `(function (__id) {${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${stringifyValue(id)})`
+    const getClientString = "const _jxc={getClient:function(name){return getClientScopedById(name,__id)}}"
+    const execString = `(function(__id){${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${stringifyValue(id)})`
     
    
     const deferString = `window.addEventListener("load",function(){${execString}});`
