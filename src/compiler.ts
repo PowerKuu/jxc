@@ -31,11 +31,11 @@ function createClientFunctionString(func: Function, id: string, defer = false, a
     const funcString = func.toString()
     const funcMinifyString = minifyJavascript(funcString, false) ?? funcString
 
-    const funcMinfiyFixedString = funcMinifyString.replaceAll(/\(0,_jxc\.getClient\)\(([^)]*)\)/gm, `(0,_jxc.getClient)("$1")`)
+    const funcMinfiyFixedString = funcMinifyString.replaceAll(/\(0,_jxc\.getScope\)\(([^)]*)\)/gm, `(0,_jxc.getClient)("$1")`)
 
     const stringArgs = args.length > 0 ? proccessArgs(args) : ""
 
-    const getClientString = "const _jxc={getClient:function(name){return getClientScopedById(name,__id)}}"
+    const getClientString = "const _jxc={getScope:function(name){return getClientScopedById(name,__id)}}"
     const execString = `(function(__id){${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${stringifyValue(id)})`
     
    
@@ -214,7 +214,7 @@ export function useClient(values: {[key: string]: unknown}) {
  
 
 // Client side
-export function getClient<V extends any>(value: V):V {
+export function getScope<V extends any>(value: V):V {
     return value
 }
 
