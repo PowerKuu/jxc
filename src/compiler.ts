@@ -196,7 +196,7 @@ export function appendScriptBundel(script:string, semicolon:boolean = true) {
 // Helper functions
 
 // Returns uuid function scoped
-export function useClient(values: {[key: string]: unknown}):string {    
+export function useClientScope(values: {[key: string]: unknown}):string {    
     const UUID = crypto.randomUUID()
     
     for (var [key, value] of Object.entries(values)) {   
@@ -204,6 +204,12 @@ export function useClient(values: {[key: string]: unknown}):string {
     }
 
     return UUID
+}
+
+export function useClient(values: {[key: string]: unknown}) {    
+    for (var [key, value] of Object.entries(values)) {   
+        registerClientVariabel(key, stringifyValue(value))
+    }
 }
  
 

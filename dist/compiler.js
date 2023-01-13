@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.id = exports.getClient = exports.useClient = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
+exports.id = exports.getClient = exports.useClient = exports.useClientScope = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
 const path_1 = require("path");
 const fs_1 = require("fs");
 const crypto = require("crypto");
@@ -141,12 +141,18 @@ function appendScriptBundel(script, semicolon = true) {
 exports.appendScriptBundel = appendScriptBundel;
 // Helper functions
 // Returns uuid function scoped
-function useClient(values) {
+function useClientScope(values) {
     const UUID = crypto.randomUUID();
     for (var [key, value] of Object.entries(values)) {
         registerClientVariabel([UUID, key].join(":"), (0, utils_1.stringifyValue)(value));
     }
     return UUID;
+}
+exports.useClientScope = useClientScope;
+function useClient(values) {
+    for (var [key, value] of Object.entries(values)) {
+        registerClientVariabel(key, (0, utils_1.stringifyValue)(value));
+    }
 }
 exports.useClient = useClient;
 // Client side
