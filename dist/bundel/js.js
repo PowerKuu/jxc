@@ -1,7 +1,3 @@
-function elementId(id) {
-    return document.getElementById(id)
-}
-
 function getClientScopedById(value, id) {
     function drillUntilScope(element) {
         const attrScope = element.getAttribute("data-scope")
@@ -18,6 +14,5 @@ function getClientScopedById(value, id) {
 
 // Make sure import is correct
 window["_jxc"] = {
-    elementId,
     getClientScopedById
 }

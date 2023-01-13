@@ -217,8 +217,3 @@ export function useClient(values: {[key: string]: unknown}) {
 export function getScope<V extends any>(value: V):V {
     return value
 }
-
-// Client side
-export function elementId(id:string): HTMLElement {
-    return 
-}

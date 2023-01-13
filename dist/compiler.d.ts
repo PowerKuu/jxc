@@ -10,5 +10,4 @@ export declare function useClient(values: {
     [key: string]: unknown;
 }): void;
 export declare function getScope<V extends any>(value: V): V;
-export declare function elementId(id: string): HTMLElement;
 //# sourceMappingURL=compiler.d.ts.map
