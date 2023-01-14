@@ -18,16 +18,23 @@ function createInitialBundle() {
     }));
     return { script, style };
 }
-function createClientFunctionString(func, id, defer = false, args = []) {
+function createClientScope(scope) {
+    var scopeString = "";
+    for (var [key, value] of Object.entries(scope)) {
+        scopeString += `var ${key}=${(0, utils_1.stringifyValue)(value)};`;
+    }
+    return scopeString;
+}
+function createClientFunctionString(func, scope, defer = false, args = []) {
     function proccessArgs(args) {
         return (0, utils_1.stringifyValue)(args).slice(1, -1);
     }
     const funcString = func.toString();
     const funcMinifyString = (0, utils_1.minifyJavascript)(funcString, false) ?? funcString;
     const stringArgs = args.length > 0 ? proccessArgs(args) : "";
-    const execString = `(${funcMinifyString})(${stringArgs})`;
+    const execString = `(function(){${createClientScope(scope)}(${funcMinifyString})(${stringArgs})})()`;
     const deferString = `window.addEventListener("load",function(){${execString}});`;
-    return defer ? deferString : execString;
+    return defer ? deferString : `${execString};`;
 }
 function getClientVariabel(name) {
     return `window["${name}"]`;
@@ -61,13 +68,8 @@ function compileAttributes(element) {
     var attributesArray = [];
     for (var [key, value] of Object.entries(element.attributes)) {
         if (typeof value == "function") {
-            const funcName = registerClientFunction(createClientFunctionString(value, element.id, false, [element]));
+            const funcName = registerClientFunction(createClientFunctionString(value, element.scope, false, [element]));
             attributesArray.push(createAttribute(key, getClientFunction(funcName)));
-            continue;
-        }
-        else if (key == "scope" && typeof value == "object") {
-            const UUID = crypto.randomUUID();
-            attributesArray.push(createAttribute("data-scope", UUID));
             continue;
         }
         if (excludeList.includes(key))
@@ -90,7 +92,7 @@ function compileChildren(element) {
             continue;
         }
         else if (element.tag == "script" && typeof child == "function") {
-            const execString = createClientFunctionString(child, element.id, element.attributes.defer);
+            const execString = createClientFunctionString(child, element.scope, element.attributes.defer);
             childrenArray.push(execString);
             continue;
         }
@@ -101,16 +103,34 @@ function compileChildren(element) {
     }
     return childrenArray.join("").trim();
 }
-function compile(element) {
-    var contentString = compileChildren(element);
-    var attributesString = compileAttributes(element);
-    console.log(element.scope);
-    return `<${element.tag} id="${element.id}"${attributesString}>${contentString}</${element.tag}>`;
+function compileScope(root) {
+    function recursiveMergeScope(element, parentScope) {
+        const currentScope = element.attributes.use ?? {};
+        const mergedScope = { ...parentScope, ...currentScope };
+        element.scope = mergedScope;
+        if (!element.children)
+            return element;
+        element.children = element.children.map((child) => {
+            if (typeof child == "string")
+                return child;
+            if (typeof child == "function")
+                return child;
+            return recursiveMergeScope(child, mergedScope);
+        });
+        return element;
+    }
+    return recursiveMergeScope(root, {});
+}
+function compile(root) {
+    var contentString = compileChildren(root);
+    var attributesString = compileAttributes(root);
+    return `<${root.tag} id="${root.id}"${attributesString}>${contentString}</${root.tag}>`;
 }
 exports.compile = compile;
 function construct(options) {
     bundel = defaultBundel;
-    const compiled = compile(options.element);
+    const scopedElement = compileScope(options.element);
+    const compiled = compile(scopedElement);
     const dirPath = (0, path_1.resolve)(__dirname, options.outDir);
     const fullPath = (0, path_1.join)(dirPath, "index.html");
     (0, fs_1.mkdirSync)(dirPath, { recursive: true });
@@ -125,14 +145,6 @@ exports.construct = construct;
 function factory(tag, attributes, ...children) {
     // Convert to 1D
     children = [].concat(...children);
-    var index = 0;
-    for (var child of children) {
-        index += 1;
-        if (child["attributes"] && attributes?.scope) {
-            console.log("Scope", { ...attributes.scope, ...(child["attributes"]?.scope ?? {}) });
-            child[index - 1].scope = { ...attributes.scope, ...(child["attributes"]?.scope ?? {}) };
-        }
-    }
     if (typeof tag == "function")
         return tag({ ...attributes, children: children });
     return {

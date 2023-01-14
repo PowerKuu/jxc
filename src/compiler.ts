@@ -23,7 +23,17 @@ function createInitialBundle():Compiler.Bundel {
     return {script, style}
 }
 
-function createClientFunctionString(func: Function, id: string, defer = false, args:any[] = []) {
+function createClientScope(scope:JSX.Attribute.Use):string {
+    var scopeString = ""
+
+    for (var [key, value] of Object.entries(scope)) {
+        scopeString += `var ${key}=${stringifyValue(value)};`
+    }
+
+    return scopeString
+}
+
+function createClientFunctionString(func: Function, scope: JSX.Attribute.Use, defer = false, args:any[] = []) {
     function proccessArgs(args:any[]){
         return stringifyValue(args).slice(1, -1)
     }
@@ -33,12 +43,11 @@ function createClientFunctionString(func: Function, id: string, defer = false, a
 
     const stringArgs = args.length > 0 ? proccessArgs(args) : ""
 
-
-    const execString = `(${funcMinifyString})(${stringArgs})`
+    const execString = `(function(){${createClientScope(scope)}(${funcMinifyString})(${stringArgs})})()`
    
     const deferString = `window.addEventListener("load",function(){${execString}});`
 
-    return defer ? deferString : execString
+    return defer ? deferString : `${execString};`
 }
 
 function getClientVariabel(name:string):string {
@@ -85,7 +94,7 @@ function compileAttributes(element: JSX.Element):string {
     for (var [key, value] of  Object.entries(element.attributes)) {
         if (typeof value == "function") {
             const funcName = registerClientFunction(
-                createClientFunctionString(value, element.id, false, [element])
+                createClientFunctionString(value, element.scope, false, [element])
             )
 
             attributesArray.push(
@@ -94,13 +103,6 @@ function compileAttributes(element: JSX.Element):string {
                     getClientFunction(funcName)
                 )
             )
-
-            continue
-        }
-        else if (key == "scope" && typeof value == "object") {
-            const UUID = crypto.randomUUID()
-
-            attributesArray.push(createAttribute("data-scope", UUID))
 
             continue
         }
@@ -132,7 +134,7 @@ function compileChildren(element: JSX.Element):string {
         else if (element.tag == "script" && typeof child == "function") {
             const execString = createClientFunctionString(
                 child, 
-                element.id,
+                element.scope,
                 element.attributes.defer
             )
 
@@ -148,19 +150,40 @@ function compileChildren(element: JSX.Element):string {
     return childrenArray.join("").trim()
 }
 
-export function compile(element: JSX.Element):string {
-    var contentString:string = compileChildren(element)
-    var attributesString:string = compileAttributes(element)
+function compileScope(root: JSX.Element) {
+    function recursiveMergeScope(element:JSX.Element, parentScope:JSX.Attribute.Use) {
+        const currentScope = element.attributes.use ?? {}
+        const mergedScope = {...parentScope, ...currentScope} 
+        
+        element.scope = mergedScope
 
-    console.log(element.scope)
+        if (!element.children) return element
 
-    return `<${element.tag} id="${element.id}"${attributesString}>${contentString}</${element.tag}>`
+        element.children = element.children.map((child) => {
+            if (typeof child == "string") return child
+            if (typeof child == "function") return child
+
+            return recursiveMergeScope(child, mergedScope)
+        })
+
+        return element
+    }
+
+    return recursiveMergeScope(root, {})
+}
+
+export function compile(root: JSX.Element):string {
+    var contentString:string = compileChildren(root)
+    var attributesString:string = compileAttributes(root)
+
+    return `<${root.tag} id="${root.id}"${attributesString}>${contentString}</${root.tag}>`
 }
 
 export function construct(options: Compiler.ConstructionOptions) {
     bundel = defaultBundel
 
-    const compiled = compile(options.element)
+    const scopedElement = compileScope(options.element)
+    const compiled = compile(scopedElement)
 
     const dirPath = resolve(__dirname, options.outDir)
     const fullPath = join(dirPath, "index.html")
@@ -178,16 +201,6 @@ export function construct(options: Compiler.ConstructionOptions) {
 export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Function, attributes:JSX.Attributes|null, ...children: JSX.Children[]):JSX.Element {
     // Convert to 1D
     children = [].concat(...children)
-
-    var index = 0
-    
-    for (var child of children) {
-        index += 1
-        if (child["attributes"] && attributes?.scope) {
-            console.log("Scope", {...attributes.scope, ...(child["attributes"]?.scope ?? {})})
-            child[index-1]!.scope = {...attributes.scope, ...(child["attributes"]?.scope ?? {})}
-        }
-    }
 
     if (typeof tag == "function") return tag({...attributes, children: children})
     
