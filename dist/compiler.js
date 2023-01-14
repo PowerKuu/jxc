@@ -68,7 +68,7 @@ function compileAttributes(element) {
     var attributesArray = [];
     for (var [key, value] of Object.entries(element.attributes)) {
         if (typeof value == "function") {
-            const funcName = registerClientFunction(createClientFunctionString(value, element.scope, false, [element]));
+            const funcName = registerClientFunction(createClientFunctionString(value, element.scope, false));
             attributesArray.push(createAttribute(key, getClientFunction(funcName)));
             continue;
         }

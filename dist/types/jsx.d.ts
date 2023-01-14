@@ -208,7 +208,7 @@ declare namespace JSX {
     type Class = string|string[]
     type Style = string|CSSProperties
     type Use = {[name: string]: any}
-    type EventHandler<T> = (element:Element) => any
+    type EventHandler<T> = () => any
   }
 
   interface Attributes {

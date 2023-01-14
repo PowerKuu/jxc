@@ -94,7 +94,7 @@ function compileAttributes(element: JSX.Element):string {
     for (var [key, value] of  Object.entries(element.attributes)) {
         if (typeof value == "function") {
             const funcName = registerClientFunction(
-                createClientFunctionString(value, element.scope, false, [element])
+                createClientFunctionString(value, element.scope, false)
             )
 
             attributesArray.push(
