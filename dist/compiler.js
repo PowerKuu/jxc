@@ -54,7 +54,7 @@ function compileAttributes(element) {
     function createAttribute(key, value) {
         return `${key}=${encapsolateString(String(value))}`;
     }
-    const excludeList = ["id"];
+    const excludeList = ["id", "use"];
     function encapsolateString(str) {
         str = str.split("").map((value) => {
             if (value == `"`)

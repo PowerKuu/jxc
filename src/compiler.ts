@@ -76,7 +76,7 @@ function compileAttributes(element: JSX.Element):string {
         return `${key}=${encapsolateString(String(value))}`
     }
     
-    const excludeList = ["id"]
+    const excludeList = ["id", "use"]
     
     function encapsolateString(str:string) {
         str = str.split("").map((value) => {
