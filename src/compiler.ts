@@ -31,13 +31,10 @@ function createClientFunctionString(func: Function, id: string, defer = false, a
     const funcString = func.toString()
     const funcMinifyString = minifyJavascript(funcString, false) ?? funcString
 
-    const funcMinfiyFixedString = funcMinifyString.replaceAll(/\(0,_jxc\.getScope\)\(([^)]*)\)/gm, `(0,_jxc.getScope)("$1")`)
-
     const stringArgs = args.length > 0 ? proccessArgs(args) : ""
 
-    const getClientString = "const _jxc={getScope:function(name){return getClientScopedById(name,__id)}}"
-    const execString = `(function(__id){${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${stringifyValue(id)})`
-    
+
+    const execString = `(${funcMinifyString})(${stringArgs})`
    
     const deferString = `window.addEventListener("load",function(){${execString}});`
 
@@ -100,6 +97,13 @@ function compileAttributes(element: JSX.Element):string {
 
             continue
         }
+        else if (key == "scope" && typeof value == "object") {
+            const UUID = crypto.randomUUID()
+
+            attributesArray.push(createAttribute("data-scope", UUID))
+
+            continue
+        }
         
         if (excludeList.includes(key)) continue
 
@@ -124,7 +128,7 @@ function compileChildren(element: JSX.Element):string {
         if (typeof child == "string") {
             childrenArray.push(child)
             continue
-        } 
+        }
         else if (element.tag == "script" && typeof child == "function") {
             const execString = createClientFunctionString(
                 child, 
@@ -147,6 +151,8 @@ function compileChildren(element: JSX.Element):string {
 export function compile(element: JSX.Element):string {
     var contentString:string = compileChildren(element)
     var attributesString:string = compileAttributes(element)
+
+    console.log(element.scope)
 
     return `<${element.tag} id="${element.id}"${attributesString}>${contentString}</${element.tag}>`
 }
@@ -173,6 +179,16 @@ export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Functio
     // Convert to 1D
     children = [].concat(...children)
 
+    var index = 0
+    
+    for (var child of children) {
+        index += 1
+        if (child["attributes"] && attributes?.scope) {
+            console.log("Scope", {...attributes.scope, ...(child["attributes"]?.scope ?? {})})
+            child[index-1]!.scope = {...attributes.scope, ...(child["attributes"]?.scope ?? {})}
+        }
+    }
+
     if (typeof tag == "function") return tag({...attributes, children: children})
     
     return {
@@ -180,7 +196,9 @@ export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Functio
         attributes: attributes ?? {},
         children: children,
         
-        id: attributes?.id ?? crypto.randomUUID()
+        id: attributes?.id ?? crypto.randomUUID(),
+
+        scope: attributes?.scope ?? {}
     }
 }
 
@@ -190,30 +208,4 @@ export function appendStyleBundel(style:string) {
 
 export function appendScriptBundel(script:string, semicolon:boolean = true) {
     bundel.script += trailingSemicolon(script, semicolon)
-}
-
-
-// Helper functions
-
-// Returns uuid function scoped
-export function useClientScope(values: {[key: string]: unknown}):string {    
-    const UUID = crypto.randomUUID()
-    
-    for (var [key, value] of Object.entries(values)) {   
-        registerClientVariabel([UUID, key].join(":"), stringifyValue(value))
-    }
-
-    return UUID
-}
-
-export function useClient(values: {[key: string]: unknown}) {    
-    for (var [key, value] of Object.entries(values)) {   
-        registerClientVariabel(key, stringifyValue(value))
-    }
-}
- 
-
-// Client side
-export function getScope<V extends any>(value: V):V {
-    return value
 }

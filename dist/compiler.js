@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getScope = exports.useClient = exports.useClientScope = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
+exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
 const path_1 = require("path");
 const fs_1 = require("fs");
 const crypto = require("crypto");
@@ -24,10 +24,8 @@ function createClientFunctionString(func, id, defer = false, args = []) {
     }
     const funcString = func.toString();
     const funcMinifyString = (0, utils_1.minifyJavascript)(funcString, false) ?? funcString;
-    const funcMinfiyFixedString = funcMinifyString.replaceAll(/\(0,_jxc\.getScope\)\(([^)]*)\)/gm, `(0,_jxc.getScope)("$1")`);
     const stringArgs = args.length > 0 ? proccessArgs(args) : "";
-    const getClientString = "const _jxc={getScope:function(name){return getClientScopedById(name,__id)}}";
-    const execString = `(function(__id){${getClientString};(${funcMinfiyFixedString})(${stringArgs})})(${(0, utils_1.stringifyValue)(id)})`;
+    const execString = `(${funcMinifyString})(${stringArgs})`;
     const deferString = `window.addEventListener("load",function(){${execString}});`;
     return defer ? deferString : execString;
 }
@@ -67,6 +65,11 @@ function compileAttributes(element) {
             attributesArray.push(createAttribute(key, getClientFunction(funcName)));
             continue;
         }
+        else if (key == "scope" && typeof value == "object") {
+            const UUID = crypto.randomUUID();
+            attributesArray.push(createAttribute("data-scope", UUID));
+            continue;
+        }
         if (excludeList.includes(key))
             continue;
         if (key === "style" && typeof value !== "string")
@@ -101,6 +104,7 @@ function compileChildren(element) {
 function compile(element) {
     var contentString = compileChildren(element);
     var attributesString = compileAttributes(element);
+    console.log(element.scope);
     return `<${element.tag} id="${element.id}"${attributesString}>${contentString}</${element.tag}>`;
 }
 exports.compile = compile;
@@ -121,13 +125,22 @@ exports.construct = construct;
 function factory(tag, attributes, ...children) {
     // Convert to 1D
     children = [].concat(...children);
+    var index = 0;
+    for (var child of children) {
+        index += 1;
+        if (child["attributes"] && attributes?.scope) {
+            console.log("Scope", { ...attributes.scope, ...(child["attributes"]?.scope ?? {}) });
+            child[index - 1].scope = { ...attributes.scope, ...(child["attributes"]?.scope ?? {}) };
+        }
+    }
     if (typeof tag == "function")
         return tag({ ...attributes, children: children });
     return {
         tag: tag,
         attributes: attributes ?? {},
         children: children,
-        id: attributes?.id ?? crypto.randomUUID()
+        id: attributes?.id ?? crypto.randomUUID(),
+        scope: attributes?.scope ?? {}
     };
 }
 exports.factory = factory;
@@ -139,24 +152,3 @@ function appendScriptBundel(script, semicolon = true) {
     bundel.script += (0, utils_1.trailingSemicolon)(script, semicolon);
 }
 exports.appendScriptBundel = appendScriptBundel;
-// Helper functions
-// Returns uuid function scoped
-function useClientScope(values) {
-    const UUID = crypto.randomUUID();
-    for (var [key, value] of Object.entries(values)) {
-        registerClientVariabel([UUID, key].join(":"), (0, utils_1.stringifyValue)(value));
-    }
-    return UUID;
-}
-exports.useClientScope = useClientScope;
-function useClient(values) {
-    for (var [key, value] of Object.entries(values)) {
-        registerClientVariabel(key, (0, utils_1.stringifyValue)(value));
-    }
-}
-exports.useClient = useClient;
-// Client side
-function getScope(value) {
-    return value;
-}
-exports.getScope = getScope;

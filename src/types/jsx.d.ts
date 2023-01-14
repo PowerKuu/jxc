@@ -12,6 +12,8 @@ declare namespace JSX {
     children: Children[]
     
     id: string,
+
+    scope: Object
   }
 
   interface IntrinsicElements  {
