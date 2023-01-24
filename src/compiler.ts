@@ -152,7 +152,7 @@ function compileChildren(element: JSX.Element):string {
 
 function compileScope(root: JSX.Element) {
     function recursiveMergeScope(element:JSX.Element, parentScope:JSX.Attribute.Use) {
-        const currentScope = element.attributes.use ?? {}
+        const currentScope = element.attributes?.use ?? {}
         const mergedScope = {...parentScope, ...currentScope} 
         
         element.scope = mergedScope

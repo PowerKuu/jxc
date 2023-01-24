@@ -105,7 +105,7 @@ function compileChildren(element) {
 }
 function compileScope(root) {
     function recursiveMergeScope(element, parentScope) {
-        const currentScope = element.attributes.use ?? {};
+        const currentScope = element.attributes?.use ?? {};
         const mergedScope = { ...parentScope, ...currentScope };
         element.scope = mergedScope;
         if (!element.children)
