@@ -8,5 +8,5 @@ export default () => {
     const output = resolve(cwd(), argv[4] ?? "./build")
 
     console.log(`Starting babel input: ${input}, output: ${output}.`)
-    transpileRoutes(input, output)
+    transpileRoutes(input, output, true)
 }
