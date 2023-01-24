@@ -222,3 +222,7 @@ export function appendStyleBundel(style:string) {
 export function appendScriptBundel(script:string, semicolon:boolean = true) {
     bundel.script += trailingSemicolon(script, semicolon)
 }
+
+export function appendClientElement(target:HTMLElement, element: JSX.Element) {
+    
+}

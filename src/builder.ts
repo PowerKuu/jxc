@@ -17,9 +17,7 @@ const tryCatch = (func:Function) => {
     }
 }
 
-export function transpileRoutes(input:string) {
-    const output = buildLocation
-
+export function transpileRoutes(input:string, output = buildLocation) {
     const command = [
         "npx", "babel", input,
         "--out-dir", output,
@@ -32,9 +30,7 @@ export function transpileRoutes(input:string) {
     execSync(command)
 }
 
-export function evalRoutes(output:string) {
-    const input = buildLocation
-
+export function evalRoutes(output:string, input = buildLocation) {
     const dirs = fs.readdirSync(input, {withFileTypes: true})
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name)

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
+exports.appendClientElement = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
 const path_1 = require("path");
 const fs_1 = require("fs");
 const crypto = require("crypto");
@@ -164,3 +164,6 @@ function appendScriptBundel(script, semicolon = true) {
     bundel.script += (0, utils_1.trailingSemicolon)(script, semicolon);
 }
 exports.appendScriptBundel = appendScriptBundel;
+function appendClientElement(target, element) {
+}
+exports.appendClientElement = appendClientElement;
