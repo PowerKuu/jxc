@@ -17,8 +17,8 @@ const tryCatch = (func:Function) => {
     }
 }
 
-export function transpileRoutes(input:string, output = buildLocation) {
-    const command = [
+export function transpileRoutes(input:string, output = buildLocation, declaration:boolean = false) {
+    const babelCommand = [
         "npx", "babel", input,
         "--out-dir", output,
         "--copy-files",
@@ -27,7 +27,20 @@ export function transpileRoutes(input:string, output = buildLocation) {
         "--config-file", babelConfigPath
     ].join(" ")
 
-    execSync(command)
+    execSync(babelCommand)
+
+    if (!declaration) return
+
+    const tscCommand = [
+        "npx", "tsc",
+        "--outDir", output,
+        "--rootDir", input,
+        "--declaration",
+        "--emitDeclarationOnly",
+        "--isolatedModules",
+    ].join(" ")
+
+    execSync(tscCommand)
 }
 
 export function evalRoutes(output:string, input = buildLocation) {

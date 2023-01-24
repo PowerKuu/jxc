@@ -16,8 +16,8 @@ const tryCatch = (func) => {
         return;
     }
 };
-function transpileRoutes(input, output = buildLocation) {
-    const command = [
+function transpileRoutes(input, output = buildLocation, declaration = false) {
+    const babelCommand = [
         "npx", "babel", input,
         "--out-dir", output,
         "--copy-files",
@@ -25,7 +25,18 @@ function transpileRoutes(input, output = buildLocation) {
         "--out-file-extension", ".js",
         "--config-file", babelConfigPath
     ].join(" ");
-    (0, child_process_1.execSync)(command);
+    (0, child_process_1.execSync)(babelCommand);
+    if (!declaration)
+        return;
+    const tscCommand = [
+        "npx", "tsc",
+        "--outDir", output,
+        "--rootDir", input,
+        "--declaration",
+        "--emitDeclarationOnly",
+        "--isolatedModules",
+    ].join(" ");
+    (0, child_process_1.execSync)(tscCommand);
 }
 exports.transpileRoutes = transpileRoutes;
 function evalRoutes(output, input = buildLocation) {
