@@ -75,7 +75,7 @@ function compileAttributes(element) {
         if (excludeList.includes(key))
             continue;
         if (key === "style" && typeof value !== "string")
-            value = Object.entries(value).map(([k, v]) => `${k}:${v}`).join(';');
+            value = Object.entries(value).filter(([k, v]) => !!v && !!k).map(([k, v]) => `${k}:${v}`).join(';');
         if (Array.isArray(value))
             value = value.join(" ");
         attributesArray.push(createAttribute(key, value));
@@ -124,6 +124,8 @@ function compileScope(root) {
     return recursiveMergeScope(root, {});
 }
 function compile(root) {
+    if (!root)
+        return "";
     var contentString = compileChildren(root);
     var attributesString = compileAttributes(root);
     return `<${root.tag} id="${root.id}"${attributesString}>${contentString}</${root.tag}>`;
