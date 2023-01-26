@@ -40,6 +40,8 @@ export function transpileRoutes(input:string, output = buildLocation, declaratio
         "--isolatedModules",
     ].join(" ")
 
+    //console.log(tscCommand)
+
     execSync(tscCommand)
 }
 

@@ -36,6 +36,7 @@ function transpileRoutes(input, output = buildLocation, declaration = false) {
         "--emitDeclarationOnly",
         "--isolatedModules",
     ].join(" ");
+    //console.log(tscCommand)
     (0, child_process_1.execSync)(tscCommand);
 }
 exports.transpileRoutes = transpileRoutes;

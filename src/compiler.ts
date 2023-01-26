@@ -204,7 +204,7 @@ export function factory<Tag extends keyof JSX.IntrinsicElements>(tag:Tag|Functio
     // Convert to 1D
     children = [].concat(...children)
 
-    if (typeof tag == "function") return tag({...attributes, children: children})
+    if (typeof tag == "function") return tag({...attributes, children})
     
     return {
         tag: tag,

@@ -150,7 +150,7 @@ function factory(tag, attributes, ...children) {
     // Convert to 1D
     children = [].concat(...children);
     if (typeof tag == "function")
-        return tag({ ...attributes, children: children });
+        return tag({ ...attributes, children });
     return {
         tag: tag,
         attributes: attributes ?? {},
