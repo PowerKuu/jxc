@@ -71,7 +71,7 @@ npx @klevn/jxc build
 
 - Use modules css or regular classes
 ```tsx
-import styles from "./test.module.css"
+import styles from "./test.module.css.ts.js"
 
 function Component() {
     return <p class={[styles.text]}></p>

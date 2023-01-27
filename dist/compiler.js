@@ -1,19 +1,17 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.appendClientElement = exports.appendScriptBundel = exports.appendStyleBundel = exports.factory = exports.construct = exports.compile = void 0;
-const path_1 = require("path");
-const fs_1 = require("fs");
-const crypto = require("crypto");
-const utils_1 = require("./utils/utils");
+import { join, resolve } from "path";
+import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import * as crypto from "crypto";
+import { getNames, minifyCss, minifyJavascript, stringifyValue, trailingSemicolon } from "./utils/utils.js";
+const { __dirname, __filename } = getNames(import.meta);
 var defaultBundel = createInitialBundle();
 var bundel = defaultBundel;
 function createInitialBundle() {
-    const scriptBundelPath = (0, path_1.join)(__dirname, "bundel", "js.js");
-    const cssBundelPath = (0, path_1.join)(__dirname, "bundel", "css.css");
-    const script = (0, utils_1.minifyJavascript)((0, fs_1.readFileSync)(scriptBundelPath, {
+    const scriptBundelPath = join(__dirname, "bundel", "js.js");
+    const cssBundelPath = join(__dirname, "bundel", "css.css");
+    const script = minifyJavascript(readFileSync(scriptBundelPath, {
         "encoding": "utf-8"
     }), true);
-    const style = (0, utils_1.minifyCss)((0, fs_1.readFileSync)(cssBundelPath, {
+    const style = minifyCss(readFileSync(cssBundelPath, {
         "encoding": "utf-8"
     }));
     return { script, style };
@@ -21,16 +19,16 @@ function createInitialBundle() {
 function createClientScope(scope) {
     var scopeString = "";
     for (var [key, value] of Object.entries(scope)) {
-        scopeString += `var ${key}=${(0, utils_1.stringifyValue)(value)};`;
+        scopeString += `var ${key}=${stringifyValue(value)};`;
     }
     return scopeString;
 }
 function createClientFunctionString(func, scope, defer = false, args = []) {
     function proccessArgs(args) {
-        return (0, utils_1.stringifyValue)(args).slice(1, -1);
+        return stringifyValue(args).slice(1, -1);
     }
     const funcString = func.toString();
-    const funcMinifyString = (0, utils_1.minifyJavascript)(funcString, false) ?? funcString;
+    const funcMinifyString = minifyJavascript(funcString, false) ?? funcString;
     const stringArgs = args.length > 0 ? proccessArgs(args) : "";
     const execString = `(function(){${createClientScope(scope)}(${funcMinifyString})(${stringArgs})})()`;
     const deferString = `window.addEventListener("load",function(){${execString}});`;
@@ -123,30 +121,28 @@ function compileScope(root) {
     }
     return recursiveMergeScope(root, {});
 }
-function compile(root) {
+export function compile(root) {
     if (!root)
         return "";
     var contentString = compileChildren(root);
     var attributesString = compileAttributes(root);
     return `<${root.tag} id="${root.id}"${attributesString}>${contentString}</${root.tag}>`;
 }
-exports.compile = compile;
-function construct(options) {
+export function construct(options) {
     bundel = defaultBundel;
     const scopedElement = compileScope(options.element);
     const compiled = compile(scopedElement);
-    const dirPath = (0, path_1.resolve)(__dirname, options.outDir);
-    const fullPath = (0, path_1.join)(dirPath, "index.html");
-    (0, fs_1.mkdirSync)(dirPath, { recursive: true });
-    (0, fs_1.writeFileSync)(fullPath, [
+    const dirPath = resolve(__dirname, options.outDir);
+    const fullPath = join(dirPath, "index.html");
+    mkdirSync(dirPath, { recursive: true });
+    writeFileSync(fullPath, [
         "<!DOCTYPE html>",
         `<script>${bundel.script}</script>`,
         `<style>${bundel.style}</style>`,
         compiled
     ].join(""));
 }
-exports.construct = construct;
-function factory(tag, attributes, ...children) {
+export function factory(tag, attributes, ...children) {
     // Convert to 1D
     children = [].concat(...children);
     if (typeof tag == "function")
@@ -159,15 +155,12 @@ function factory(tag, attributes, ...children) {
         scope: attributes?.scope ?? {}
     };
 }
-exports.factory = factory;
-function appendStyleBundel(style) {
+export function appendStyleBundel(style) {
     bundel.style += style;
 }
-exports.appendStyleBundel = appendStyleBundel;
-function appendScriptBundel(script, semicolon = true) {
-    bundel.script += (0, utils_1.trailingSemicolon)(script, semicolon);
+export function appendScriptBundel(script, semicolon = true) {
+    bundel.script += trailingSemicolon(script, semicolon);
 }
-exports.appendScriptBundel = appendScriptBundel;
-function appendClientElement(target, element) {
+export function appendClientElement(target, element) {
 }
-exports.appendClientElement = appendClientElement;
+export default factory;

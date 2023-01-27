@@ -1,8 +1,9 @@
-const t = require("@babel/types")
-const babelTemplate = require("@babel/template").default
 const babel = require("@babel/core")
 
-module.exports = () => {
+const helper = require("@babel/helper-module-transforms")
+
+
+module.exports = () => { 
     return {
         visitor: {
             Program: {
@@ -11,9 +12,12 @@ module.exports = () => {
                     const file = state.file
     
                     if (!options.accept(file.opts.filename)) return
-                    path.node.body.unshift(
-                        babel.parse(options.prepend).program.body[0]
-                    )             
+
+                    const prepend = babel.parse(options.prepend).program.body[0]
+
+                    helper.ensureStatementsHoisted([prepend])
+
+                    path.unshiftContainer("body", prepend)             
                 }
             }
         }

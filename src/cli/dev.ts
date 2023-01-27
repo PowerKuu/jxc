@@ -1,6 +1,6 @@
 import { resolve } from "path"
 import { argv, cwd } from "process"
-import { build } from "../builder"
+import { build } from "../builder.js"
 import { watch } from "fs"
 
 export default () => {

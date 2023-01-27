@@ -1,22 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.build = exports.evalRoutes = exports.transpileRoutes = void 0;
-const child_process_1 = require("child_process");
-const path_1 = require("path");
-const compiler_1 = require("./compiler");
-const fs = require("fs");
-const buildLocation = (0, path_1.join)(__dirname, ".build");
-const babelConfigPath = (0, path_1.resolve)(__dirname, "../babel.config.js");
+import { execSync } from "child_process";
+import { join, parse, resolve } from "path";
+import { construct } from "./compiler.js";
+import { tryCatch, getNames } from "./utils/utils.js";
+import * as fs from "fs";
+const { __dirname, __filename } = getNames(import.meta);
+const buildLocation = join(__dirname, ".build");
+const babelConfigPath = resolve(__dirname, "../babel.config.js");
 const fileClientBlacklist = [".js", ".css"];
-const tryCatch = (func) => {
-    try {
-        return func();
-    }
-    catch (error) {
-        return;
-    }
-};
-function transpileRoutes(input, output = buildLocation, declaration = false) {
+export async function transpileRoutes(input, output = buildLocation, declaration = false) {
     const babelCommand = [
         "npx", "babel", input,
         "--out-dir", output,
@@ -25,7 +16,8 @@ function transpileRoutes(input, output = buildLocation, declaration = false) {
         "--out-file-extension", ".js",
         "--config-file", babelConfigPath
     ].join(" ");
-    (0, child_process_1.execSync)(babelCommand);
+    //console.log(babelCommand)
+    execSync(babelCommand);
     if (!declaration)
         return;
     const tscCommand = [
@@ -37,14 +29,13 @@ function transpileRoutes(input, output = buildLocation, declaration = false) {
         "--isolatedModules",
     ].join(" ");
     //console.log(tscCommand)
-    (0, child_process_1.execSync)(tscCommand);
+    execSync(tscCommand);
 }
-exports.transpileRoutes = transpileRoutes;
-function evalRoutes(output, input = buildLocation) {
+export async function evalRoutes(output, input = buildLocation) {
     const dirs = fs.readdirSync(input, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name);
-    function buildPath(inPath, outPath) {
+    async function buildPath(inPath, outPath) {
         const paths = fs.readdirSync(inPath, { withFileTypes: true });
         var hasCreatedOut = false;
         function insureOutExist() {
@@ -53,15 +44,15 @@ function evalRoutes(output, input = buildLocation) {
             hasCreatedOut = true;
         }
         for (var path of paths) {
-            const source = (0, path_1.join)(inPath, path.name);
-            const destination = (0, path_1.join)(outPath, path.name);
+            const source = join(inPath, path.name);
+            const destination = join(outPath, path.name);
             if (path.isDirectory()) {
                 buildPath(source, destination);
                 continue;
             }
             const pathSplit = path.name.split(".");
             if (path.name == "index.js") {
-                const rootComponent = tryCatch(() => require(source).default);
+                const rootComponent = (await tryCatch(async () => import(source))).default;
                 if (!rootComponent)
                     continue;
                 if (!(typeof rootComponent == "function")) {
@@ -73,7 +64,7 @@ function evalRoutes(output, input = buildLocation) {
                     const err = `Path: ${dirName} does not export default an element!`;
                     throw new Error(err);
                 }
-                (0, compiler_1.construct)({
+                construct({
                     outDir: outPath,
                     element: rootElement
                 });
@@ -83,26 +74,24 @@ function evalRoutes(output, input = buildLocation) {
             const isServerSide = pathSplit.length >= 3 && pathSplit[0] === "server";
             if (isServerSide)
                 continue;
-            if (fileClientBlacklist.includes((0, path_1.parse)(path.name).ext) && isClientSide == false)
+            if (fileClientBlacklist.includes(parse(path.name).ext) && isClientSide == false)
                 continue;
             insureOutExist();
             fs.copyFileSync(source, destination);
         }
     }
     for (var dirName of dirs) {
-        const inPath = (0, path_1.join)(input, dirName);
-        const outPath = dirName === "index" ? output : (0, path_1.join)(output, dirName);
+        const inPath = join(input, dirName);
+        const outPath = dirName === "index" ? output : join(output, dirName);
         buildPath(inPath, outPath);
     }
 }
-exports.evalRoutes = evalRoutes;
-function build(input, output) {
+export async function build(input, output) {
     if (fs.existsSync(buildLocation))
         fs.rmSync(buildLocation, { recursive: true, force: true });
     fs.mkdirSync(input, { recursive: true });
     fs.mkdirSync(output, { recursive: true });
     fs.mkdirSync(buildLocation, { recursive: true });
-    transpileRoutes(input);
-    evalRoutes(output);
+    await transpileRoutes(input);
+    await evalRoutes(output);
 }
-exports.build = build;

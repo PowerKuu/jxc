@@ -1,6 +1,8 @@
 import { minify as minifyJavascriptUnsafe } from "uglify-js"
+import { fileURLToPath } from "url"
+import { dirname } from "path"
 
-const CleanCss = require('clean-css')
+const CleanCss = (await import("clean-css")).default
 const cleanCss = new CleanCss()
 
 export function trailingSemicolon(target:string, semicolon:boolean):string {
@@ -107,4 +109,19 @@ function stringifyObject(object:Object):string {
     
         return `{${str}}`
     }
+}
+
+export function tryCatch<T extends (...args:any) => any> (func: T):ReturnType<T> {
+    try {
+        return func()
+    } catch (error) {
+        return
+    }
+}
+
+export function getNames(meta: any) {
+  const __filename = fileURLToPath(meta.url)
+  const __dirname = dirname(__filename)
+
+  return { __dirname, __filename }
 }

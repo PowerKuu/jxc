@@ -3,7 +3,9 @@ import { mkdirSync, readFileSync, writeFileSync } from "fs"
 
 import * as crypto from "crypto"
 
-import { minifyCss, minifyJavascript, stringifyValue, trailingSemicolon } from "./utils/utils"
+import { getNames, minifyCss, minifyJavascript, stringifyValue, trailingSemicolon } from "./utils/utils.js"
+
+const { __dirname, __filename } = getNames(import.meta)
 
 var defaultBundel:Compiler.Bundel = createInitialBundle()
 var bundel = defaultBundel
@@ -228,3 +230,6 @@ export function appendScriptBundel(script:string, semicolon:boolean = true) {
 export function appendClientElement(target:HTMLElement, element: JSX.Element) {
     
 }
+
+
+export default factory

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 import { argv } from "process"
-import build from "./build"
-import dev from "./dev"
-import babel from "./babel"
-//import dev from "./dev"
+import build from "./build.js"
+import dev from "./dev.js"
+import babel from "./babel.js"
+//import dev from "./dev.ts.js"
 
 
 switch (argv[2].toLowerCase()) {

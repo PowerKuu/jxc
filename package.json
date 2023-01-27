@@ -2,12 +2,13 @@
   "dependencies": {
     "@babel/cli": "^7.20.7",
     "@babel/core": "^7.20.7",
+    "@babel/helper-module-imports": "^7.18.6",
     "@babel/plugin-transform-modules-commonjs": "^7.20.11",
     "@babel/plugin-transform-react-jsx": "^7.20.7",
     "@babel/preset-typescript": "^7.18.6",
+    "@babel/register": "^7.18.9",
     "@babel/template": "^7.20.7",
     "@babel/types": "^7.20.7",
-    "babel-plugin-prepend": "^1.0.2",
     "child_process": "^1.0.2",
     "clean-css": "^5.3.1",
     "cssnano": "^5.1.14",
@@ -26,15 +27,16 @@
     "@types/babel__core": "^7.1.20",
     "@types/node": "^18.11.18",
     "@types/uglify-js": "^3.17.1",
-    "copyfiles": "^2.4.1"
+    "copyfiles": "^2.4.1"  
   },
   "name": "@klevn/jxc",
-  "version": "36.0.5",
+  "version": "38.0.4",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": "./dist/cli/barrel.js",
+  "type": "module",
   "scripts": {
-    "build": "npx tsc && npx copyfiles -u 1 --exclude src/**/*.ts src/**/* dist/",
+    "build": "npx tsc && npx copyfiles -u 1 --exclude src/**/*.ts src/**/* dist/ && cd ./dist",
     "update": "npm run build && npm publish --access=public"
   },
   "keywords": [

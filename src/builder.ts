@@ -1,23 +1,20 @@
 import { execSync } from "child_process"
 import { join, parse, resolve } from "path"
-import { construct } from "./compiler"
+import { construct } from "./compiler.js"
+
+import { tryCatch, getNames } from "./utils/utils.js"
+
 
 import * as fs from "fs"
+
+const { __dirname, __filename } = getNames(import.meta)
 
 const buildLocation = join(__dirname, ".build")
 const babelConfigPath = resolve(__dirname, "../babel.config.js")
 
 const fileClientBlacklist = [".js", ".css"]
 
-const tryCatch = (func:Function) => {
-    try {
-        return func()
-    } catch (error) {
-        return
-    }
-}
-
-export function transpileRoutes(input:string, output = buildLocation, declaration:boolean = false) {
+export async function transpileRoutes(input:string, output = buildLocation, declaration:boolean = false) {
     const babelCommand = [
         "npx", "babel", input,
         "--out-dir", output,
@@ -26,6 +23,8 @@ export function transpileRoutes(input:string, output = buildLocation, declaratio
         "--out-file-extension", ".js",
         "--config-file", babelConfigPath
     ].join(" ")
+
+    //console.log(babelCommand)
 
     execSync(babelCommand)
 
@@ -45,13 +44,13 @@ export function transpileRoutes(input:string, output = buildLocation, declaratio
     execSync(tscCommand)
 }
 
-export function evalRoutes(output:string, input = buildLocation) {
+export async function evalRoutes(output:string, input = buildLocation) {
     const dirs = fs.readdirSync(input, {withFileTypes: true})
     .filter(dirent => dirent.isDirectory())
     .map(dirent => dirent.name)
 
 
-    function buildPath(inPath:string, outPath:string) {
+    async function buildPath(inPath:string, outPath:string) {
         const paths = fs.readdirSync(inPath, {withFileTypes: true})
         var hasCreatedOut = false
 
@@ -72,7 +71,7 @@ export function evalRoutes(output:string, input = buildLocation) {
             const pathSplit = path.name.split(".")
 
             if (path.name == "index.js"){
-                const rootComponent = tryCatch(() => require(source).default)
+                const rootComponent = (await tryCatch(async () => import(source))).default
             
                 if (!rootComponent) continue
 
@@ -115,7 +114,7 @@ export function evalRoutes(output:string, input = buildLocation) {
     }
 }
 
-export function build(input:string, output:string) {
+export async function build(input:string, output:string) {
     if (fs.existsSync(buildLocation)) fs.rmSync(buildLocation, 
         {recursive: true, force: true}
     )
@@ -124,6 +123,6 @@ export function build(input:string, output:string) {
     fs.mkdirSync(output, {recursive: true})
     fs.mkdirSync(buildLocation, {recursive: true})
 
-    transpileRoutes(input)
-    evalRoutes(output)
+    await transpileRoutes(input)
+    await evalRoutes(output)
 }

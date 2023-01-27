@@ -9,7 +9,7 @@ const fs = require("fs")
 
 const appendStyleFunctionName = "appendStyleBundel"
 
-const IsolateCssWorker = createSyncFn(require.resolve("./isolate-css-worker"))
+const IsolateCssWorker = createSyncFn(require.resolve("./isolate-css-worker.cjs"))
 
 function CssImportVisitor(callback) {
     return (babelData, { file, options = {} }) => {

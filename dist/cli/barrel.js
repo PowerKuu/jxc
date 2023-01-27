@@ -1,20 +1,18 @@
 #!/usr/bin/env node
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const process_1 = require("process");
-const build_1 = require("./build");
-const dev_1 = require("./dev");
-const babel_1 = require("./babel");
-//import dev from "./dev"
-switch (process_1.argv[2].toLowerCase()) {
+import { argv } from "process";
+import build from "./build.js";
+import dev from "./dev.js";
+import babel from "./babel.js";
+//import dev from "./dev.ts.js"
+switch (argv[2].toLowerCase()) {
     case "build":
-        (0, build_1.default)();
+        build();
         break;
     case "babel":
-        (0, babel_1.default)();
+        babel();
         break;
     case "dev":
-        (0, dev_1.default)();
+        dev();
         break;
     default:
         console.log("Use an argument.");

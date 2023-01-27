@@ -4,4 +4,5 @@ export declare function factory<Tag extends keyof JSX.IntrinsicElements>(tag: Ta
 export declare function appendStyleBundel(style: string): void;
 export declare function appendScriptBundel(script: string, semicolon?: boolean): void;
 export declare function appendClientElement(target: HTMLElement, element: JSX.Element): void;
+export default factory;
 //# sourceMappingURL=compiler.d.ts.map

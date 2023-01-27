@@ -1,6 +1,6 @@
 import { resolve } from "path"
 import { argv, cwd } from "process"
-import { transpileRoutes } from "../builder"
+import { transpileRoutes } from "../builder.js"
 
 
 export default () => {

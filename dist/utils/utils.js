@@ -1,10 +1,9 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.stringifyValue = exports.minifyCss = exports.minifyJavascript = exports.trailingSemicolon = void 0;
-const uglify_js_1 = require("uglify-js");
-const CleanCss = require('clean-css');
+import { minify as minifyJavascriptUnsafe } from "uglify-js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+const CleanCss = (await import("clean-css")).default;
 const cleanCss = new CleanCss();
-function trailingSemicolon(target, semicolon) {
+export function trailingSemicolon(target, semicolon) {
     if (semicolon) {
         return (target.endsWith(";") ? target : `${target};`);
     }
@@ -12,9 +11,8 @@ function trailingSemicolon(target, semicolon) {
         return (target.endsWith(";") ? target.slice(0, -1) : target);
     }
 }
-exports.trailingSemicolon = trailingSemicolon;
-function minifyJavascript(str, semicolon) {
-    const minified = (0, uglify_js_1.minify)(str, {
+export function minifyJavascript(str, semicolon) {
+    const minified = minifyJavascriptUnsafe(str, {
         "compress": false,
     });
     if (minified.error)
@@ -22,8 +20,7 @@ function minifyJavascript(str, semicolon) {
     // Remove trailing semicolon
     return trailingSemicolon(minified.code, semicolon);
 }
-exports.minifyJavascript = minifyJavascript;
-function minifyCss(str) {
+export function minifyCss(str) {
     const minifed = cleanCss.minify(str);
     if (minifed.errors.length > 0) {
         throw new Error(minifed.errors.join("\n"));
@@ -33,8 +30,7 @@ function minifyCss(str) {
     }
     return minifed.styles ?? "";
 }
-exports.minifyCss = minifyCss;
-function stringifyValue(value) {
+export function stringifyValue(value) {
     const stringifyTypes = ["string", "number", "object", "boolean", "bigint", "symbol"];
     const stringTypes = ["function"];
     if (typeof value == "object") {
@@ -57,7 +53,6 @@ function stringifyValue(value) {
     }
     return "undefined";
 }
-exports.stringifyValue = stringifyValue;
 function stringifyObject(object) {
     var str = "";
     var index = 0;
@@ -87,4 +82,17 @@ function stringifyObject(object) {
         }
         return `{${str}}`;
     }
+}
+export function tryCatch(func) {
+    try {
+        return func();
+    }
+    catch (error) {
+        return;
+    }
+}
+export function getNames(meta) {
+    const __filename = fileURLToPath(meta.url);
+    const __dirname = dirname(__filename);
+    return { __dirname, __filename };
 }

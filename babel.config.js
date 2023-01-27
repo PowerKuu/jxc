@@ -1,37 +1,33 @@
-const path = require("path")
+import { parse } from "path"
 
-const package = "@klevn/jxc"
+const packageName = "@klevn/jxc"
 
-module.exports = {
-    "presets": ["@babel/preset-typescript"],
+//const imports = require("@babel/helper-module-imports")
+//imports.addNamespace(path, "source")
+
+export default {
+  "plugins": [
+    [
+      "@babel/plugin-transform-react-jsx",
+      {
+        "runtime": "classic",
+        "pragma": "_compiler.factory",
+      }
+    ],
     
-    "plugins": [
-      "./plugins/css",
-      
-      [
-        "./plugins/prepend",
-        {
-          "prepend": `var _compiler = require("${package}")`,
-          "accept": (filename) => {
-            const fileExt = path.parse(filename).ext
-            return fileExt === ".tsx" || fileExt === ".jsx"
-          }
+    [
+      "./plugins/prepend.cjs",
+      {
+        "prepend": `import * as _compiler from "${packageName}"`,
+        "accept": (fileName) => {
+          const fileExt = parse(fileName).ext
+          return fileExt === ".tsx" || fileExt === ".jsx"
         }
-      ],
+      }
+    ],
 
-      [
-        "@babel/plugin-transform-react-jsx",
-        {
-          "importSource": false, // defaults to react,
-          "pragma": "_compiler.factory"
-        }
-      ],
+    "./plugins/css.cjs"
+  ],
 
-      [
-        "@babel/plugin-transform-modules-commonjs",
-        {
-          "importInterop": "babel"
-        }
-      ],
-    ]
+  "presets": ["@babel/preset-typescript"],
 }
