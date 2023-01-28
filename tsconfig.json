@@ -13,6 +13,6 @@
         "declarationMap": true
     },
 
-    "files": ["./src/types/jsx.d.ts", "./src/types/index.d.ts"],
+    "files": ["./src/types/jsx.d.ts", "src/types/compiler.d.ts"],
     "include": ["src", "src/cli/.cli.ts", "src/cli/.cli.ts"],
 }
