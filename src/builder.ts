@@ -6,6 +6,7 @@ import { tryCatch, getNames } from "./utils/utils.js"
 
 
 import * as fs from "fs"
+import { pathToFileURL } from "url"
 
 const { __dirname, __filename } = getNames(import.meta)
 
@@ -71,7 +72,7 @@ export async function evalRoutes(output:string, input = buildLocation) {
             const pathSplit = path.name.split(".")
 
             if (path.name == "index.js"){
-                const rootComponent = (await tryCatch(async () => import(source))).default
+                const rootComponent = (await tryCatch(async () => import(pathToFileURL(source).toString()))).default
             
                 if (!rootComponent) continue
 

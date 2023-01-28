@@ -3,6 +3,7 @@ import { join, parse, resolve } from "path";
 import { construct } from "./compiler.js";
 import { tryCatch, getNames } from "./utils/utils.js";
 import * as fs from "fs";
+import { pathToFileURL } from "url";
 const { __dirname, __filename } = getNames(import.meta);
 const buildLocation = join(__dirname, ".build");
 const babelConfigPath = resolve(__dirname, "../babel.config.js");
@@ -52,7 +53,7 @@ export async function evalRoutes(output, input = buildLocation) {
             }
             const pathSplit = path.name.split(".");
             if (path.name == "index.js") {
-                const rootComponent = (await tryCatch(async () => import(source))).default;
+                const rootComponent = (await tryCatch(async () => import(pathToFileURL(source).toString()))).default;
                 if (!rootComponent)
                     continue;
                 if (!(typeof rootComponent == "function")) {
