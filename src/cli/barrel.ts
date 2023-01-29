@@ -4,7 +4,6 @@ import { argv } from "process"
 import build from "./build.js"
 import dev from "./dev.js"
 import babel from "./babel.js"
-//import dev from "./dev.ts.js"
 
 
 switch (argv[2].toLowerCase()) {
@@ -21,6 +20,6 @@ switch (argv[2].toLowerCase()) {
         break
 
     default:
-        console.log("Use an argument.")
+        console.log("Use an argument - (dev, build, babel).")
         break
 }
