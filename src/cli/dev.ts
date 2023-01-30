@@ -1,9 +1,10 @@
 import { resolve } from "path"
 import { argv, cwd } from "process"
-import { build } from "../builder.js"
-import { watch } from "chokidar"
+import * as branchy from "branchy"
+import { watch } from "fs"
 
-const timeoutDuration = 2000
+const timeoutDuration = 3500
+const buildWorker = branchy("../utils/build-worker.js")
 
 export default () => {
     const input = resolve(cwd(), argv[3] ?? "./routes")
@@ -21,17 +22,14 @@ export default () => {
     
             console.log(`${formatedDate} - New live server reload.`)
     
-            build(input, output)
+            buildWorker(input, output)
         }, timeoutDuration)
     }
 
-    const watcher = watch(input, {persistent: true, awaitWriteFinish: true})
+    const watcher = watch(input, {persistent: true, recursive: true})
 
     startBuild()
     watcher.on("change", () => startBuild())
-    watcher.on("add", () => startBuild())
-    watcher.on("unlink", () => startBuild())
-
     watcher.on("error", (err) => console.error(err))
 
     console.log(`Edit ${input} for live updates.`)

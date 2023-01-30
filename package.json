@@ -9,6 +9,7 @@
     "@babel/register": "^7.18.9",
     "@babel/template": "^7.20.7",
     "@babel/types": "^7.20.7",
+    "branchy": "^2.0.0",
     "child_process": "^1.0.2",
     "chokidar": "^3.5.3",
     "clean-css": "^5.3.1",
@@ -26,12 +27,13 @@
   },
   "devDependencies": {
     "@types/babel__core": "^7.1.20",
+    "@types/branchy": "^2.0.0",
     "@types/node": "^18.11.18",
     "@types/uglify-js": "^3.17.1",
     "copyfiles": "^2.4.1"
   },
   "name": "@klevn/jxc",
-  "version": "38.0.8",
+  "version": "38.0.9",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": "./dist/cli/barrel.js",
