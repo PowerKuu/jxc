@@ -96,3 +96,8 @@ export function getNames(meta) {
     const __dirname = dirname(__filename);
     return { __dirname, __filename };
 }
+export function addExtension(path, extension) {
+    if (path.endsWith(`.${extension}`))
+        return path;
+    return `${path}.${extension}`;
+}

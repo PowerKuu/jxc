@@ -1,9 +1,10 @@
 import { resolve } from "path";
 import { argv, cwd } from "process";
-import * as branchy from "branchy";
 import { watch } from "fs";
+import { fork } from "child_process";
+import { getNames } from "../utils/utils.js";
 const timeoutDuration = 3500;
-const buildWorker = branchy("../utils/build-worker.js");
+const { __dirname, __filename } = getNames(import.meta);
 export default () => {
     const input = resolve(cwd(), argv[3] ?? "./routes");
     const output = resolve(cwd(), argv[4] ?? "./dist");
@@ -16,7 +17,7 @@ export default () => {
             const date = new Date();
             const formatedDate = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
             console.log(`${formatedDate} - New live server reload.`);
-            buildWorker(input, output);
+            fork(resolve(__dirname, "../utils/build-worker.js"), [input, output]);
         }, timeoutDuration);
     }
     const watcher = watch(input, { persistent: true, recursive: true });

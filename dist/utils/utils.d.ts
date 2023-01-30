@@ -7,4 +7,5 @@ export declare function getNames(meta: any): {
     __dirname: string;
     __filename: string;
 };
+export declare function addExtension(path: string, extension: string): string;
 //# sourceMappingURL=utils.d.ts.map

@@ -125,3 +125,8 @@ export function getNames(meta: any) {
 
   return { __dirname, __filename }
 }
+
+export function addExtension(path:string, extension:string) {
+    if (path.endsWith(`.${extension}`)) return path
+    return `${path}.${extension}`
+}

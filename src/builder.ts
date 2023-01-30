@@ -2,7 +2,7 @@ import { execSync } from "child_process"
 import { join, parse, resolve } from "path"
 import { construct } from "./compiler.js"
 
-import { tryCatch, getNames } from "./utils/utils.js"
+import { tryCatch, getNames, addExtension } from "./utils/utils.js"
 
 
 import * as fs from "fs"
@@ -72,7 +72,9 @@ export async function evalRoutes(output:string, input = buildLocation) {
             const pathSplit = path.name.split(".")
 
             if (path.name == "index.js"){
-                const rootComponent = (await tryCatch(async () => import(pathToFileURL(source).toString()))).default
+                const rootComponent = (await tryCatch(async () => import(
+                    addExtension(pathToFileURL(source).toString(), "js")
+                ))).default
             
                 if (!rootComponent) continue
 

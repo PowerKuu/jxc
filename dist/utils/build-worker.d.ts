@@ -1,3 +1,2 @@
-declare const _default: (input: string, output: string) => void;
-export default _default;
+export {};
 //# sourceMappingURL=build-worker.d.ts.map

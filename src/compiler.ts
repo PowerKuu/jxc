@@ -228,7 +228,7 @@ export function appendScriptBundel(script:string, semicolon:boolean = true) {
 }
 
 export function appendClientElement(target:HTMLElement, element: JSX.Element) {
-    
+
 }
 
 

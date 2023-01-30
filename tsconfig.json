@@ -1,16 +1,17 @@
 {
     "compilerOptions": {
-        "target": "ESNext",
-        "module": "es2022",
+        "target": "esnext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "jsx": "preserve",
 
         "jsxFactory": "_compiler.factory",
 
-        "moduleResolution": "Node",
-
         "outDir": "dist",
         "declaration": true,
-        "declarationMap": true
+        "declarationMap": true,
+
+        "allowSyntheticDefaultImports": true
     },
 
     "files": ["./src/types/jsx.d.ts", "src/types/compiler.d.ts"],
