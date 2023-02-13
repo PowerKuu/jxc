@@ -85,11 +85,6 @@ export async function evalRoutes(output:string, input = buildLocation) {
                 
                 const rootElement:JSX.Element = rootComponent()
         
-                if (!rootElement.id) {
-                    const err = `Path: ${dirName} does not export default an element!`
-                    throw new Error(err)
-                }
-        
                 construct({
                     outDir: outPath,
                     element: rootElement

@@ -61,10 +61,6 @@ export async function evalRoutes(output, input = buildLocation) {
                     throw new Error(err);
                 }
                 const rootElement = rootComponent();
-                if (!rootElement.id) {
-                    const err = `Path: ${dirName} does not export default an element!`;
-                    throw new Error(err);
-                }
                 construct({
                     outDir: outPath,
                     element: rootElement
