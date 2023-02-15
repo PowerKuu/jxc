@@ -19,13 +19,13 @@ export default {
       "./plugins/prepend.cjs",
       {
         "prepend": `import * as _compiler from "${packageName}"`,
-        "accept": (fileName) => {
-          const fileExt = parse(fileName).ext
+        "accept": (filePath) => {
+          const parsedPath = parse(filePath)
 
-          const fileSplit = fileName.split(".")
+          const fileSplit = parsedPath.base.split(".")
           const isClient = fileSplit.length >= 3 && fileSplit[0] === "client"
 
-          return (isClient == false) && (fileExt === ".tsx" || fileExt === ".jsx")
+          return (isClient == false) && (parsedPath.ext === ".tsx" || parsedPath.ext === ".jsx")
         }
       }
     ],
@@ -35,3 +35,4 @@ export default {
 
   "presets": ["@babel/preset-typescript"],
 }
+
