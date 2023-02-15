@@ -32,7 +32,7 @@
     "copyfiles": "^2.4.1"
   },
   "name": "@klevn/jxc",
-  "version": "38.5.9",
+  "version": "38.7.9",
   "main": "./dist/compiler.js",
   "types": "./dist/compiler.d.ts",
   "bin": "./dist/cli/barrel.js",
@@ -48,6 +48,7 @@
     "compile-jsx",
     "compile-tsx"
   ],
+  "homepage": "https://github.com/PowerKuu/jxc",
   "author": "Klevn",
   "license": "ISC",
   "description": "A javascript tool to compile tsx and jsx files to static index.html files on the server. It uses babel and a custom compiler."

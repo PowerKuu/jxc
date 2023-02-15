@@ -21,7 +21,11 @@ export default {
         "prepend": `import * as _compiler from "${packageName}"`,
         "accept": (fileName) => {
           const fileExt = parse(fileName).ext
-          return fileExt === ".tsx" || fileExt === ".jsx"
+
+          const fileSplit = fileName.split(".")
+          const isClient = fileSplit.length >= 3 && fileSplit[0] === "client"
+
+          return (isClient == false) && (fileExt === ".tsx" || fileExt === ".jsx")
         }
       }
     ],
